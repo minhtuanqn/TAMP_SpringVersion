@@ -77,7 +77,7 @@ public class CategoryController {
      * @return resource data of category
      */
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Object> searchLocations(@RequestParam(value = "searchedValue", defaultValue = "") String searchedValue,
+    public ResponseEntity<Object> searchCategories(@RequestParam(value = "searchedValue", defaultValue = "") String searchedValue,
                                                   @RequestPagingParam PaginationRequestModel paginationRequestModel) {
         ResourceModel<CategoryModel> categoryList = categoryService.searchCategories(searchedValue, paginationRequestModel);
         return new ResponseEntity<>(categoryList, HttpStatus.OK);
