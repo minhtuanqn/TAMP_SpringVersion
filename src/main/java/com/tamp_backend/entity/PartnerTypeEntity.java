@@ -21,7 +21,6 @@ public class PartnerTypeEntity {
     public PartnerTypeEntity(PartnerTypeModel model){
         this.id = model.getId();
         this.typeName = model.getTypeName();
-        this.description = model.getDescription();
         this.commissionRate = model.getCommissionRate();
         this.status = model.getStatus();
     }

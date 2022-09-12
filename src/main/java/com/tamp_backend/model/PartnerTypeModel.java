@@ -19,7 +19,6 @@ public class PartnerTypeModel {
     public PartnerTypeModel(PartnerTypeEntity entity) {
         this.id = entity.getId();
         this.typeName = entity.getTypeName();
-        this.description = entity.getDescription();
         this.commissionRate = entity.getCommissionRate();
         this.status = entity.getStatus();
     }
@@ -27,8 +26,6 @@ public class PartnerTypeModel {
     private UUID id;
 
     private String typeName;
-
-    private String description;
 
     private Double commissionRate;
 
