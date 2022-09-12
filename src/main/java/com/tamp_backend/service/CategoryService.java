@@ -39,10 +39,6 @@ public class CategoryService {
         if(categoryRepository.existsCategoryEntityByName(model.getName())) {
             throw new DuplicatedEntityException("This category has been existed");
         }
-        //Set id for model is null
-        if(model.getId() != null) {
-            model.setId(UUID.randomUUID());
-        }
 
         //Prepare entity
         CategoryEntity entity = new CategoryEntity(model);
