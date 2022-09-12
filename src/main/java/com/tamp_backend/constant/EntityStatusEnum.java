@@ -12,4 +12,12 @@ public class EntityStatusEnum {
         DISABLE, //0
         ACTIVE, //1
     }
+
+    /**
+     * Status enum of category entity
+     */
+    public enum PartnerTypeStatusEnum {
+        DISABLE, //0
+        ACTIVE, //1
+    }
 }
