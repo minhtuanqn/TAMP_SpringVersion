@@ -1,6 +1,6 @@
 package com.tamp_backend.entity;
 
-import com.tamp_backend.model.PartnerTypeModel;
+import com.tamp_backend.model.AffiliatorTypeModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,19 +12,20 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "partner_type")
+@Table(name = "affiliator_type")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PartnerTypeEntity {
-    public PartnerTypeEntity(PartnerTypeModel model){
+public class AffiliatorTypeEntity {
+    public AffiliatorTypeEntity(AffiliatorTypeModel model) {
         this.id = model.getId();
         this.typeName = model.getTypeName();
         this.description = model.getDescription();
         this.commissionRate = model.getCommissionRate();
         this.status = model.getStatus();
     }
+
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
