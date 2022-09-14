@@ -1,6 +1,6 @@
 package com.tamp_backend.entity;
 
-import com.tamp_backend.model.CategoryModel;
+import com.tamp_backend.model.account.AccountModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,18 +12,19 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "category")
+@Table(name = "system_account")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryEntity {
+public class AccountEntity {
 
-    public CategoryEntity(CategoryModel model) {
+    public AccountEntity(AccountModel model) {
         this.id = model.getId();
-        this.name = model.getName();
-        this.description = model.getDescription();
-        this.commissionRate = model.getCommissionRate();
+        this.username = model.getUsername();
+        this.email = model.getEmail();
+        this.password = model.getPassword();
+        this.role = model.getRole();
         this.status = model.getStatus();
     }
 
@@ -34,15 +35,18 @@ public class CategoryEntity {
     @Type(type = "uuid-char")
     private UUID id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "user_name")
+    private String username;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "email")
+    private String email;
 
-    @Column(name = "commission_rate")
-    private Double commissionRate;
+    @Column(name = "password")
+    private String password;
+
+    @Column(name = "role")
+    private String role;
 
     @Column(name = "status")
-    private Integer status;
+    private int status;
 }

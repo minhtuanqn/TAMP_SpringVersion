@@ -28,4 +28,12 @@ public class EntityStatusEnum {
         DISABLE, //0
         ACTIVE, //1
     }
+
+    /**
+     * Status enum of account entity
+     */
+    public enum AccountStatusEnum {
+        DISABLE, //0
+        ACTIVE, //1
+    }
 }
