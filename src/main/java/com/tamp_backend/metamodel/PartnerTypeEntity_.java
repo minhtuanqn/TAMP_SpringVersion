@@ -11,7 +11,6 @@ public class PartnerTypeEntity_ {
     public static volatile SingularAttribute<PartnerTypeEntity, String> description;
     public static volatile SingularAttribute<PartnerTypeEntity, Double> commissionRate;
     public static volatile SingularAttribute<PartnerTypeEntity, Integer> status;
-
     public static final String ID = "id";
     public static final String TYPE_NAME = "typeName";
     public static final String DESCRIPTION = "description";
