@@ -1,0 +1,51 @@
+package com.tamp_backend.service;
+
+import com.tamp_backend.constant.UserEnum;
+import com.tamp_backend.customexception.NoSuchEntityException;
+import com.tamp_backend.entity.AccountEntity;
+import com.tamp_backend.entity.SystemAdminEntity;
+import com.tamp_backend.model.account.AccountDetailsModel;
+import com.tamp_backend.repository.AccountRepository;
+import com.tamp_backend.repository.SystemAdminRepository;
+import org.springframework.stereotype.Service;
+import java.util.Optional;
+
+@Service
+public class AccountService {
+
+    private AccountRepository accountRepository;
+    private SystemAdminRepository systemAdminRepository;
+
+    public AccountService(AccountRepository accountRepository,
+                          SystemAdminRepository systemAdminRepository)
+    {
+        this.accountRepository = accountRepository;
+        this.systemAdminRepository = systemAdminRepository;
+    }
+
+    public AccountDetailsModel buildAccountDetailModel(String username) {
+        Optional<AccountEntity> optionalAccountEntity = accountRepository.findByUsername(username);
+        AccountEntity accountEntity = optionalAccountEntity.orElseThrow(() -> new NoSuchEntityException("Not found account with username"));
+        AccountDetailsModel accountDetailsModel = new AccountDetailsModel();
+        if(accountEntity.getRole().equals(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())) {
+            Optional<SystemAdminEntity> optionalSystemAdminEntity = systemAdminRepository.findByAccountId(accountEntity.getId());
+            SystemAdminEntity systemAdminEntity = optionalSystemAdminEntity.orElseThrow(() -> new NoSuchEntityException("Not found information of user"));
+            accountDetailsModel.id(accountEntity.getId()).role(accountEntity.getRole())
+                    .email(accountEntity.getEmail())
+                    .username(username)
+                    .userId(systemAdminEntity.getId())
+                    .password(accountEntity.getPassword());
+        } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.AFFILIATOR.toString())) {
+
+        } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.PARTNER.toString())) {
+
+        } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.SHIPPER.toString())) {
+
+        } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.SUPPLIER.toString())) {
+
+        } else {
+            throw new NoSuchEntityException("Not found account with username");
+        }
+        return accountDetailsModel;
+    }
+}

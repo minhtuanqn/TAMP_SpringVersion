@@ -14,9 +14,25 @@ public class EntityStatusEnum {
     }
 
     /**
-     * Status enum of category entity
+     * Status enum of partner type entity
      */
     public enum PartnerTypeStatusEnum {
+        DISABLE, //0
+        ACTIVE, //1
+    }
+
+    /**
+     * Status enum of affiliator type entity
+     */
+    public enum AffiliatorTypeStatusEnum {
+        DISABLE, //0
+        ACTIVE, //1
+    }
+
+    /**
+     * Status enum of account entity
+     */
+    public enum AccountStatusEnum {
         DISABLE, //0
         ACTIVE, //1
     }
