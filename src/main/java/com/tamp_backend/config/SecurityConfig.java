@@ -63,6 +63,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/accounts/login/**").anonymous()
                 .antMatchers("**/customer").anonymous()
                 .antMatchers("/categories/**").hasAuthority(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())
+                .antMatchers("/affiliator-types/**").hasAuthority(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())
+                .antMatchers("/partner-types/**").hasAuthority(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())
                 //if any exception occurs call this
                 .and().exceptionHandling()
                 .authenticationEntryPoint(unauthorizedHandler)
