@@ -31,15 +31,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         if(accountEntity.getStatus() == EntityStatusEnum.AccountStatusEnum.DISABLE.ordinal())
             throw new NoSuchEntityException("Not found account with username");
         if(accountEntity.getRole().equals(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())) {
-            roles = List.of(new SimpleGrantedAuthority(UserEnum.RoleEnum.SYSTEM_ADMIN.toString()));
+            roles = List.of(new SimpleGrantedAuthority("ROLE_" + UserEnum.RoleEnum.SYSTEM_ADMIN));
         } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.AFFILIATOR.toString())) {
-            roles = List.of(new SimpleGrantedAuthority(UserEnum.RoleEnum.AFFILIATOR.toString()));
+            roles = List.of(new SimpleGrantedAuthority("ROLE_" + UserEnum.RoleEnum.AFFILIATOR));
         } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.PARTNER.toString())) {
-            roles = List.of(new SimpleGrantedAuthority(UserEnum.RoleEnum.PARTNER.toString()));
+            roles = List.of(new SimpleGrantedAuthority("ROLE_" + UserEnum.RoleEnum.PARTNER));
         } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.SHIPPER.toString())) {
-            roles = List.of(new SimpleGrantedAuthority(UserEnum.RoleEnum.SHIPPER.toString()));
+            roles = List.of(new SimpleGrantedAuthority("ROLE_" + UserEnum.RoleEnum.SHIPPER));
         } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.SUPPLIER.toString())) {
-            roles = List.of(new SimpleGrantedAuthority(UserEnum.RoleEnum.SUPPLIER.toString()));
+            roles = List.of(new SimpleGrantedAuthority("ROLE_" + UserEnum.RoleEnum.SUPPLIER));
         } else {
             throw new NoSuchEntityException("User not found with username: " + username);
         }
