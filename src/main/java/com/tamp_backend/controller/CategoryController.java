@@ -1,6 +1,6 @@
 package com.tamp_backend.controller;
 
-import com.tamp_backend.model.CategoryModel;
+import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;

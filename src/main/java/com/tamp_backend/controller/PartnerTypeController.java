@@ -1,9 +1,8 @@
 package com.tamp_backend.controller;
 
 
-import com.tamp_backend.entity.PartnerTypeEntity;
 import com.tamp_backend.model.PaginationRequestModel;
-import com.tamp_backend.model.PartnerTypeModel;
+import com.tamp_backend.model.partnertype.PartnerTypeModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.PartnerTypeService;
@@ -15,7 +14,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController

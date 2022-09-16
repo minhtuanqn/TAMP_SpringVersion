@@ -1,4 +1,4 @@
-package com.tamp_backend.model;
+package com.tamp_backend.model.station;
 
 import com.tamp_backend.entity.StationEntity;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,6 @@
 package com.tamp_backend.controller;
 
-import com.tamp_backend.entity.AffiliatorTypeEntity;
-import com.tamp_backend.model.AffiliatorTypeModel;
+import com.tamp_backend.model.affiliatortype.AffiliatorTypeModel;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;

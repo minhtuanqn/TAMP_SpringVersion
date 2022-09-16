@@ -2,13 +2,12 @@ package com.tamp_backend.service;
 
 import com.tamp_backend.constant.EntityStatusEnum;
 import com.tamp_backend.convertor.PaginationConvertor;
-import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.StationEntity;
 import com.tamp_backend.metamodel.StationEntity_;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
-import com.tamp_backend.model.StationModel;
+import com.tamp_backend.model.station.StationModel;
 import com.tamp_backend.repository.StationRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

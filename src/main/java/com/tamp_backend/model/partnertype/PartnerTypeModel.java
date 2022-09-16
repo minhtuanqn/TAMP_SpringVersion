@@ -1,6 +1,6 @@
-package com.tamp_backend.model;
+package com.tamp_backend.model.partnertype;
 
-import com.tamp_backend.entity.AffiliatorTypeEntity;
+import com.tamp_backend.entity.PartnerTypeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,8 +14,9 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AffiliatorTypeModel {
-    public AffiliatorTypeModel(AffiliatorTypeEntity entity) {
+public class PartnerTypeModel {
+
+    public PartnerTypeModel(PartnerTypeEntity entity) {
         this.id = entity.getId();
         this.typeName = entity.getTypeName();
         this.description = entity.getDescription();
@@ -24,8 +25,13 @@ public class AffiliatorTypeModel {
     }
 
     private UUID id;
+
     private String typeName;
+
     private String description;
+
     private Double commissionRate;
+
     private Integer status;
+
 }

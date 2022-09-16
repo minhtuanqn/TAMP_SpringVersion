@@ -1,6 +1,6 @@
 package com.tamp_backend.entity;
 
-import com.tamp_backend.model.CategoryModel;
+import com.tamp_backend.model.category.CategoryModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -3,7 +3,7 @@ package com.tamp_backend.controller;
 
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
-import com.tamp_backend.model.StationModel;
+import com.tamp_backend.model.station.StationModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.StationService;
 import org.springframework.http.HttpStatus;

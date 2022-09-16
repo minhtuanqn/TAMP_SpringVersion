@@ -1,6 +1,6 @@
 package com.tamp_backend.entity;
 
-import com.tamp_backend.model.StationModel;
+import com.tamp_backend.model.station.StationModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

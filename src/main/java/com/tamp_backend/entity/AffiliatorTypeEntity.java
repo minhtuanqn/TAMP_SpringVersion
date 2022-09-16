@@ -1,6 +1,6 @@
 package com.tamp_backend.entity;
 
-import com.tamp_backend.model.AffiliatorTypeModel;
+import com.tamp_backend.model.affiliatortype.AffiliatorTypeModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
