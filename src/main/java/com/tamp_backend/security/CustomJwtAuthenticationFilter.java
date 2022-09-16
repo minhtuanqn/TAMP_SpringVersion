@@ -44,10 +44,7 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
                 System.out.println("Cannot set the Security Context");
             }
 
-        } catch (ExpiredJwtException ex) {
-            request.setAttribute("exception", ex);
-            throw ex;
-        } catch (BadCredentialsException ex) {
+        } catch (ExpiredJwtException | BadCredentialsException ex) {
             request.setAttribute("exception", ex);
             throw ex;
         }
@@ -56,8 +53,12 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String extractJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("X-TAMP-Token");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        if (StringUtils.hasText(bearerToken)) {
+            if(bearerToken.startsWith("Bearer ")) {
+                return bearerToken.substring(7);
+            } else {
+                return bearerToken;
+            }
         }
         return null;
     }
