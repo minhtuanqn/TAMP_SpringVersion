@@ -36,4 +36,12 @@ public class EntityStatusEnum {
         DISABLE, //0
         ACTIVE, //1
     }
+
+    /**
+     * Status enum of station entity
+     */
+    public enum StationStatusEnum {
+        DISABLE, //0
+        ACTIVE, //1
+    }
 }
