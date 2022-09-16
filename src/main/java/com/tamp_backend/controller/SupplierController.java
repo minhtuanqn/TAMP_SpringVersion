@@ -1,7 +1,5 @@
 package com.tamp_backend.controller;
 
-import com.tamp_backend.constant.UserEnum.RoleEnum;
-import com.tamp_backend.model.CategoryModel;
 import com.tamp_backend.model.ResponseModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
 import com.tamp_backend.model.supplier.SupplierModel;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -69,6 +68,17 @@ public class SupplierController {
         SupplierModel supplierModel = supplierService.findSupplierById(id);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(supplierModel)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+
+    @DeleteMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> deleteSuppliers(@RequestBody List<UUID> ids) {
+        List<SupplierModel> supplierModels = supplierService.deleteSuppliersByIds(ids);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(supplierModels)
                 .message("OK");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }

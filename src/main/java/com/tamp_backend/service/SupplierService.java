@@ -20,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -131,5 +133,17 @@ public class SupplierService {
         SupplierModel supplierModel = modelMapper.map(supplierEntity, SupplierModel.class);
         supplierModel.setAccountModel(modelMapper.map(accountEntity, AccountModel.class));
         return supplierModel;
+    }
+
+    public List<SupplierModel> deleteSuppliersByIds(List<UUID> ids) {
+        if(ids == null)
+            throw new IllegalArgumentException("Not found any suppliers");
+        List<SupplierModel> supplierModels = new ArrayList<>();
+
+        for (UUID id: ids) {
+           SupplierModel supplierModel = deleteSupplier(id);
+           supplierModels.add(supplierModel);
+        }
+        return  supplierModels;
     }
 }
