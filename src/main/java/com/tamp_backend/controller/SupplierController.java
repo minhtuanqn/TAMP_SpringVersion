@@ -72,7 +72,11 @@ public class SupplierController {
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }
 
-
+    /**
+     * Delete suppliers by list of id
+     * @param ids
+     * @return response model contains deleted suppliers
+     */
     @DeleteMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<ResponseModel> deleteSuppliers(@RequestBody List<UUID> ids) {

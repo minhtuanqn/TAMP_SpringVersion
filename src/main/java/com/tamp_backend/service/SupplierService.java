@@ -5,10 +5,8 @@ import com.tamp_backend.constant.UserEnum;
 import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.AccountEntity;
-import com.tamp_backend.entity.CategoryEntity;
 import com.tamp_backend.entity.SupplierEntity;
 import com.tamp_backend.entity.WalletEntity;
-import com.tamp_backend.model.CategoryModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
 import com.tamp_backend.model.supplier.SupplierModel;
 import com.tamp_backend.model.systemaccount.AccountModel;
@@ -135,6 +133,11 @@ public class SupplierService {
         return supplierModel;
     }
 
+    /**
+     * Delete list of supplier
+     * @param ids
+     * @return list of deleted supplier models
+     */
     public List<SupplierModel> deleteSuppliersByIds(List<UUID> ids) {
         if(ids == null)
             throw new IllegalArgumentException("Not found any suppliers");
