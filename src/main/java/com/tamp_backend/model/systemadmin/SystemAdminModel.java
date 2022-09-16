@@ -1,7 +1,5 @@
 package com.tamp_backend.model.systemadmin;
 
-import com.tamp_backend.entity.SystemAdminEntity;
-import com.tamp_backend.model.account.AccountModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

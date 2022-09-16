@@ -1,6 +1,6 @@
 package com.tamp_backend.security;
 
-import com.tamp_backend.model.account.AccountDetailsModel;
+import com.tamp_backend.model.systemaccount.AccountDetailsModel;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;

@@ -16,4 +16,15 @@ public class UserEnum {
         AFFILIATOR,
         SHIPPER,
     }
+
+    /**
+     * Enum of all wallet type of all roles
+     */
+    public enum WalletTypeEnum
+    {
+        SYSTEM,
+        SUPPLIER,
+        PARTNER,
+        AFFILIATOR
+    }
 }

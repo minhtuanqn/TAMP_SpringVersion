@@ -9,4 +9,7 @@ import java.util.UUID;
 
 public interface AccountRepository extends CrudRepository<AccountEntity, UUID>, JpaSpecificationExecutor<AccountEntity> {
     Optional<AccountEntity> findByUsername(String username);
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
+
 }

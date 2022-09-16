@@ -1,4 +1,4 @@
-package com.tamp_backend.model.account;
+package com.tamp_backend.model.systemaccount;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
