@@ -1,6 +1,5 @@
 package com.tamp_backend.config;
 
-import com.tamp_backend.constant.UserEnum;
 import com.tamp_backend.security.CustomJwtAuthenticationFilter;
 import com.tamp_backend.security.CustomUserDetailsService;
 import com.tamp_backend.security.JwtAuthenticationEntryPoint;
@@ -57,15 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/swagger-ui/").anonymous()
-                .antMatchers("/accounts/login/**").anonymous()
-                .antMatchers("**/customer").anonymous()
-                .antMatchers("/categories/**").hasAuthority(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())
-                .antMatchers("/affiliator-types/**").hasAuthority(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())
-                .antMatchers("/partner-types/**").hasAuthority(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())
-                .antMatchers("/suppliers/**").hasAuthority(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())
+        http.csrf().disable().httpBasic()
                 //if any exception occurs call this
                 .and().exceptionHandling()
                 .authenticationEntryPoint(unauthorizedHandler)

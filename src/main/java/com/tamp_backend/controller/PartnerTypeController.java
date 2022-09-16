@@ -10,6 +10,7 @@ import com.tamp_backend.service.PartnerTypeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,7 @@ public class PartnerTypeController {
      * @return resource data of partner type
      */
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'SUPPLIER', 'PARTNER')")
     public ResponseEntity<Object> searchPartnerType(@RequestParam(value = "searchedValue", defaultValue = "") String searchedValue,
                                                     @RequestPagingParam PaginationRequestModel paginationRequestModel) {
         ResourceModel<PartnerTypeModel> partnerTypeList = partnerTypeService.searchPartnerTypes(searchedValue, paginationRequestModel);
@@ -48,6 +50,7 @@ public class PartnerTypeController {
      * @return response entity contains created model
      */
     @PostMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<PartnerTypeModel> createPartnerType(@Valid @RequestBody PartnerTypeModel requestModel) {
         PartnerTypeModel savedModel = partnerTypeService.createPartnerType(requestModel);
         return new ResponseEntity<>(savedModel, HttpStatus.OK);
@@ -61,6 +64,7 @@ public class PartnerTypeController {
      * @return response entity contains model
      */
     @PutMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<PartnerTypeModel> updatePartnerType(@PathVariable UUID id,
                                                               @Valid @RequestBody PartnerTypeModel requestModel) {
         PartnerTypeModel updatedModel = partnerTypeService.updatePartnerType(id, requestModel);
@@ -74,6 +78,7 @@ public class PartnerTypeController {
      * @return response entity contains model
      */
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'SUPPLIER', 'PARTNER')")
     public ResponseEntity<PartnerTypeModel> findPartnerTypeById(@PathVariable UUID id) {
         PartnerTypeModel model = partnerTypeService.findPartnerTypeById(id);
         return new ResponseEntity<>(model, HttpStatus.OK);
@@ -85,11 +90,10 @@ public class PartnerTypeController {
      * @return response entity contains deleted model
      */
     @DeleteMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<PartnerTypeModel> deletePartnerType(@PathVariable UUID id){
         PartnerTypeModel deletedModel = partnerTypeService.deletePartnerType(id);
         return new ResponseEntity<>(deletedModel, HttpStatus.OK);
     }
-
-
 
 }

@@ -8,6 +8,7 @@ import com.tamp_backend.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
@@ -30,6 +31,7 @@ public class CategoryController {
      * @return response entity contains created model
      */
     @PostMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<CategoryModel> createCategory(@Valid @RequestBody CategoryModel requestModel) {
         CategoryModel savedModel = categoryService.createCategory(requestModel);
         return new ResponseEntity<>(savedModel, HttpStatus.OK);
@@ -41,6 +43,7 @@ public class CategoryController {
      * @return response entity contains deleted model
      */
     @DeleteMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<CategoryModel> deleteCategory(@PathVariable UUID id) {
         CategoryModel deletedModel = categoryService.deleteCategory(id);
         return new ResponseEntity<>(deletedModel, HttpStatus.OK);
@@ -52,6 +55,7 @@ public class CategoryController {
      * @return response entity contains model
      */
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'SUPPLIER', 'PARTNER', 'AFFILIATOR')")
     public ResponseEntity<CategoryModel> findCategoryById(@PathVariable UUID id) {
         CategoryModel model = categoryService.findCategoryById(id);
         return new ResponseEntity<>(model, HttpStatus.OK);
@@ -64,6 +68,7 @@ public class CategoryController {
      * @return response entity contains model
      */
     @PutMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<CategoryModel> updateCategory(@PathVariable UUID id,
                                                         @Valid @RequestBody CategoryModel requestModel) {
         CategoryModel updatedModel = categoryService.updateCategory(id, requestModel);
@@ -77,6 +82,7 @@ public class CategoryController {
      * @return resource data of category
      */
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'SUPPLIER', 'PARTNER', 'AFFILIATOR')")
     public ResponseEntity<Object> searchCategories(@RequestParam(value = "searchedValue", defaultValue = "") String searchedValue,
                                                   @RequestPagingParam PaginationRequestModel paginationRequestModel) {
         ResourceModel<CategoryModel> categoryList = categoryService.searchCategories(searchedValue, paginationRequestModel);
