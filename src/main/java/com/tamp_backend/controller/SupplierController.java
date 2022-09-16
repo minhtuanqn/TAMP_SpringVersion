@@ -1,5 +1,6 @@
 package com.tamp_backend.controller;
 
+import com.tamp_backend.model.CategoryModel;
 import com.tamp_backend.model.ResponseModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
 import com.tamp_backend.model.supplier.SupplierModel;
@@ -49,6 +50,20 @@ public class SupplierController {
         SupplierModel deletedSupplierModel = supplierService.deleteSupplier(id);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(deletedSupplierModel)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Find supplier by id
+     * @param id
+     * @return response model contains supplier model
+     */
+    @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ResponseModel> findSupplierById(@PathVariable UUID id) {
+        SupplierModel supplierModel = supplierService.findSupplierById(id);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(supplierModel)
                 .message("OK");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }

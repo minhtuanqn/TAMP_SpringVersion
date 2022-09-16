@@ -5,8 +5,10 @@ import com.tamp_backend.constant.UserEnum;
 import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.AccountEntity;
+import com.tamp_backend.entity.CategoryEntity;
 import com.tamp_backend.entity.SupplierEntity;
 import com.tamp_backend.entity.WalletEntity;
+import com.tamp_backend.model.CategoryModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
 import com.tamp_backend.model.supplier.SupplierModel;
 import com.tamp_backend.model.systemaccount.AccountModel;
@@ -108,6 +110,26 @@ public class SupplierService {
         //Return deleted supplier model
         SupplierModel supplierModel = modelMapper.map(deletedSupplierEntity, SupplierModel.class);
         supplierModel.setAccountModel(modelMapper.map(deletedAccountEntity, AccountModel.class));
+        return supplierModel;
+    }
+
+    /**
+     * Find supplier model by id
+     * @param id
+     * @return supplier model
+     */
+    public SupplierModel findSupplierById(UUID id) {
+        //Find supplier information by id
+        Optional<SupplierEntity> optionalSupplierEntity = supplierRepository.findById(id);
+        SupplierEntity supplierEntity = optionalSupplierEntity.orElseThrow(() -> new NoSuchEntityException("Not found supplier with id"));
+
+        //Find account information of supplier
+        Optional<AccountEntity> optionalAccountEntity = accountRepository.findById(supplierEntity.getAccountId());
+        AccountEntity accountEntity = optionalAccountEntity.orElseThrow(() -> new NoSuchEntityException("Not found account of supplier with id"));
+
+        //Return supplier model
+        SupplierModel supplierModel = modelMapper.map(supplierEntity, SupplierModel.class);
+        supplierModel.setAccountModel(modelMapper.map(accountEntity, AccountModel.class));
         return supplierModel;
     }
 }
