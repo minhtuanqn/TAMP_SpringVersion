@@ -1,15 +1,20 @@
 package com.tamp_backend.service;
 
 import com.tamp_backend.constant.EntityStatusEnum;
+import com.tamp_backend.constant.StatusSearchEnum;
 import com.tamp_backend.constant.UserEnum;
+import com.tamp_backend.convertor.PaginationConvertor;
 import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.AccountEntity;
-import com.tamp_backend.entity.CategoryEntity;
 import com.tamp_backend.entity.SupplierEntity;
 import com.tamp_backend.entity.WalletEntity;
+import com.tamp_backend.metamodel.SupplierEntity_;
+import com.tamp_backend.model.PaginationRequestModel;
+import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
+import com.tamp_backend.model.supplier.SupplierFilterModel;
 import com.tamp_backend.model.supplier.SupplierModel;
 import com.tamp_backend.model.supplier.UpdateSupplierModel;
 import com.tamp_backend.model.systemaccount.AccountModel;
@@ -17,6 +22,9 @@ import com.tamp_backend.repository.AccountRepository;
 import com.tamp_backend.repository.SupplierRepository;
 import com.tamp_backend.repository.WalletRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,16 +46,17 @@ public class SupplierService {
                            ModelMapper modelMapper,
                            PasswordEncoder passwordEncoder,
                            AccountRepository accountRepository,
-                           WalletRepository walletRepository){
+                           WalletRepository walletRepository) {
         this.supplierRepository = supplierRepository;
         this.modelMapper = modelMapper;
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
-        this.walletRepository =walletRepository;
+        this.walletRepository = walletRepository;
     }
 
     /**
      * Create new supplier
+     *
      * @param createSupplierModel
      * @return supplier
      */
@@ -92,6 +101,7 @@ public class SupplierService {
 
     /**
      * Delete a supplier by id
+     *
      * @param supplierId
      * @return deleted supplier model
      */
@@ -119,6 +129,7 @@ public class SupplierService {
 
     /**
      * Find supplier model by id
+     *
      * @param id
      * @return supplier model
      */
@@ -139,21 +150,29 @@ public class SupplierService {
 
     /**
      * Delete list of supplier
+     *
      * @param ids
      * @return list of deleted supplier models
      */
     public List<SupplierModel> deleteSuppliersByIds(List<UUID> ids) {
-        if(ids == null)
+        if (ids == null)
             throw new IllegalArgumentException("Not found any suppliers");
         List<SupplierModel> supplierModels = new ArrayList<>();
 
-        for (UUID id: ids) {
-           SupplierModel supplierModel = deleteSupplier(id);
-           supplierModels.add(supplierModel);
+        for (UUID id : ids) {
+            SupplierModel supplierModel = deleteSupplier(id);
+            supplierModels.add(supplierModel);
         }
-        return  supplierModels;
+        return supplierModels;
     }
 
+    /**
+     * Update supplier
+     *
+     * @param updateSupplierModel
+     * @param logoUrl
+     * @return update supplier model
+     */
     public SupplierModel updateSupplier(UpdateSupplierModel updateSupplierModel, String logoUrl) {
         //Check existed supplier
         Optional<SupplierEntity> optionalSupplierEntity = supplierRepository.findById(updateSupplierModel.getId());
@@ -164,7 +183,7 @@ public class SupplierService {
         AccountEntity accountEntity = optionalAccountEntity.orElseThrow(() -> new NoSuchEntityException("Not found account of supplier with id"));
 
         //Save supplier information
-        if(logoUrl != null) supplierEntity.setLogo(logoUrl);
+        if (logoUrl != null) supplierEntity.setLogo(logoUrl);
         supplierEntity.setAddress(updateSupplierModel.getAddress());
         supplierEntity.setName(updateSupplierModel.getName());
         supplierEntity.setStatus(updateSupplierModel.getStatus().ordinal());
@@ -182,5 +201,106 @@ public class SupplierService {
         SupplierModel updatedSupplierModel = modelMapper.map(savedSupplier, SupplierModel.class);
         updatedSupplierModel.setAccountModel(modelMapper.map(savedAccount, AccountModel.class));
         return updatedSupplierModel;
+    }
+
+    /**
+     * Specification for search name
+     *
+     * @param searchedValue
+     * @return contains name specification
+     */
+    private Specification<SupplierEntity> containsName(String searchedValue) {
+        return ((root, query, criteriaBuilder) -> {
+            String pattern = "%" + searchedValue + "%";
+            return criteriaBuilder.like(root.get(SupplierEntity_.NAME), pattern);
+        });
+    }
+
+    /**
+     * Specification for search address
+     *
+     * @param searchedValue
+     * @return contains address specification
+     */
+    private Specification<SupplierEntity> containsAddress(String searchedValue) {
+        return ((root, query, criteriaBuilder) -> {
+            String pattern = "%" + searchedValue + "%";
+            return criteriaBuilder.like(root.get(SupplierEntity_.ADDRESS), pattern);
+        });
+    }
+
+    /**
+     * Specification for search phone
+     *
+     * @param searchedValue
+     * @return contains phone specification
+     */
+    private Specification<SupplierEntity> containsPhone(String searchedValue) {
+        return ((root, query, criteriaBuilder) -> {
+            String pattern = "%" + searchedValue + "%";
+            return criteriaBuilder.like(root.get(SupplierEntity_.PHONE), pattern);
+        });
+    }
+
+    /**
+     * Specification for filter status
+     *
+     * @param searchedEnum
+     * @return status filter specification
+     */
+    private Specification<SupplierEntity> statusFilter(StatusSearchEnum.AccountStatusSearchEnum searchedEnum) {
+        return ((root, query, criteriaBuilder) -> {
+            int searchedStatusNum = searchedEnum != null
+                    ? searchedEnum.ordinal()
+                    : StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal();
+            if (searchedStatusNum < StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal()) {
+                return criteriaBuilder.equal(root.get(SupplierEntity_.STATUS), searchedStatusNum);
+            } else {
+                return criteriaBuilder.lessThan(root.get(SupplierEntity_.STATUS), StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal());
+            }
+        });
+    }
+
+    /**
+     * Search and filter supplier
+     * @param searchedValue
+     * @param paginationRequestModel
+     * @param supplierFilterModel
+     * @return resource of data
+     */
+    public ResourceModel<SupplierModel> searchSuppliers(String searchedValue, PaginationRequestModel paginationRequestModel,
+                                                        SupplierFilterModel supplierFilterModel) {
+        PaginationConvertor<SupplierModel, SupplierEntity> paginationConvertor = new PaginationConvertor<>();
+
+        String defaultSortBy = SupplierEntity_.NAME;
+        Pageable pageable = paginationConvertor.convertToPageable(paginationRequestModel, defaultSortBy, SupplierEntity.class);
+
+        //Find all suppliers
+        String searchedName = supplierFilterModel.getName() != null ? supplierFilterModel.getName() : "";
+        String searchedAddress = supplierFilterModel.getAddress() != null ? supplierFilterModel.getAddress() : "";
+        String searchedPhone = supplierFilterModel.getPhone() != null ? supplierFilterModel.getPhone() : "";
+
+        Page<SupplierEntity> supplierEntityPage = supplierRepository.findAll(
+                containsName(searchedValue)
+                        .and(statusFilter(supplierFilterModel.getStatusType()))
+                        .and(containsAddress(searchedAddress))
+                        .and(containsPhone(searchedPhone))
+                        .and(containsName(searchedName)), pageable);
+
+        //Convert list of suppliers entity to list of suppliers model
+        List<SupplierModel> supplierModels = new ArrayList<>();
+        for (SupplierEntity entity : supplierEntityPage) {
+            SupplierModel supplierModel = modelMapper.map(entity, SupplierModel.class);
+            Optional<AccountEntity> optionalAccountEntity = accountRepository.findById(entity.getAccountId());
+            AccountEntity accountEntity = optionalAccountEntity.orElseThrow(() -> new NoSuchEntityException("Not found account of supplier with id"));
+            supplierModel.setAccountModel(modelMapper.map(accountEntity, AccountModel.class));
+            supplierModels.add(supplierModel);
+        }
+
+        //Prepare resource for return
+        ResourceModel<SupplierModel> resource = new ResourceModel<>();
+        resource.setData(supplierModels);
+        paginationConvertor.buildPagination(paginationRequestModel, supplierEntityPage, resource);
+        return resource;
     }
 }
