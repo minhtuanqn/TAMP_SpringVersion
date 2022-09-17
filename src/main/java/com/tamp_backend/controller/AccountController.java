@@ -1,8 +1,8 @@
 package com.tamp_backend.controller;
 
 import com.tamp_backend.model.ResponseModel;
-import com.tamp_backend.model.account.AccountDetailsModel;
-import com.tamp_backend.model.account.UsernameLoginModel;
+import com.tamp_backend.model.systemaccount.AccountDetailsModel;
+import com.tamp_backend.model.systemaccount.UsernameLoginModel;
 import com.tamp_backend.security.CustomUserDetailsService;
 import com.tamp_backend.security.JWTUtils;
 import com.tamp_backend.service.AccountService;

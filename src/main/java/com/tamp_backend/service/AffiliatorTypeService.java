@@ -6,7 +6,7 @@ import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.AffiliatorTypeEntity;
 import com.tamp_backend.metamodel.AffiliatorTypeEntity_;
-import com.tamp_backend.model.AffiliatorTypeModel;
+import com.tamp_backend.model.affiliatortype.AffiliatorTypeModel;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.repository.AffiliatorTypeRepository;

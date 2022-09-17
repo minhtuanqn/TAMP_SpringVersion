@@ -1,6 +1,5 @@
 package com.tamp_backend.entity;
 
-import com.tamp_backend.model.affiliatortype.AffiliatorTypeModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,35 +8,52 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "affiliator_type")
+@Table(name = "supplier")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AffiliatorTypeEntity {
-    public AffiliatorTypeEntity(AffiliatorTypeModel model) {
-        this.id = model.getId();
-        this.typeName = model.getTypeName();
-        this.description = model.getDescription();
-        this.commissionRate = model.getCommissionRate();
-        this.status = model.getStatus();
-    }
-
+public class SupplierEntity {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "id", updatable = false, nullable = false)
     @Type(type = "uuid-char")
     private UUID id;
-    @Column(name = "type_name")
-    private String typeName;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "logo")
+    private String logo;
+
     @Column(name = "description")
     private String description;
-    @Column(name = "commission_rate")
-    private Double commissionRate;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "create_at")
+    private LocalDateTime createAt;
+
+    @Column(name = "create_by")
+    @Type(type = "uuid-char")
+    private UUID createBy;
+
+    @Column(name = "update_at")
+    private LocalDateTime updateAt;
+
+    @Column(name = "account_id")
+    @Type(type = "uuid-char")
+    private UUID accountId;
+
     @Column(name = "status")
-    private Integer status;
+    private int status;
 }

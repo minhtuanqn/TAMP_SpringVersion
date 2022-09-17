@@ -1,6 +1,5 @@
 package com.tamp_backend.entity;
 
-import com.tamp_backend.model.systemaccount.AccountModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,16 +8,16 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "system_account")
+@Table(name = "wallet")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountEntity {
-
+public class WalletEntity {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
@@ -26,17 +25,18 @@ public class AccountEntity {
     @Type(type = "uuid-char")
     private UUID id;
 
-    @Column(name = "user_name")
-    private String username;
+    @Column(name = "amount")
+    private double amount;
 
-    @Column(name = "email")
-    private String email;
+    @Column(name = "create_at")
+    private LocalDateTime createAt;
 
-    @Column(name = "password")
-    private String password;
+    @Column(name = "owner_type")
+    private String ownerType;
 
-    @Column(name = "role")
-    private String role;
+    @Column(name = "account_id")
+    @Type(type = "uuid-char")
+    private UUID accountId;
 
     @Column(name = "status")
     private int status;

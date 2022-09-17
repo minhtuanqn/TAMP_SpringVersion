@@ -4,7 +4,7 @@ import com.tamp_backend.constant.UserEnum;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.AccountEntity;
 import com.tamp_backend.entity.SystemAdminEntity;
-import com.tamp_backend.model.account.AccountDetailsModel;
+import com.tamp_backend.model.systemaccount.AccountDetailsModel;
 import com.tamp_backend.repository.AccountRepository;
 import com.tamp_backend.repository.SystemAdminRepository;
 import org.springframework.stereotype.Service;

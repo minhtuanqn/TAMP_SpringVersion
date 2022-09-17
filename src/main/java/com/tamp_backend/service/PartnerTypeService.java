@@ -8,7 +8,7 @@ import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.PartnerTypeEntity;
 import com.tamp_backend.metamodel.PartnerTypeEntity_;
 import com.tamp_backend.model.PaginationRequestModel;
-import com.tamp_backend.model.PartnerTypeModel;
+import com.tamp_backend.model.partnertype.PartnerTypeModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.repository.PartnerTypeRepository;
 import org.springframework.data.domain.Page;

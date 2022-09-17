@@ -1,4 +1,4 @@
-package com.tamp_backend.model.account;
+package com.tamp_backend.model.supplier;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,11 +9,20 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsernameLoginModel {
+public class CreateSupplierModel {
 
     private String username;
 
+    private String email;
+
     private String password;
 
-    private String deviceId;
+    private String name;
+
+    private String phone;
+
+    private String description;
+
+    private String address;
+
 }

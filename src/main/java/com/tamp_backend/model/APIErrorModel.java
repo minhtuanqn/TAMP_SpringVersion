@@ -11,7 +11,10 @@ import java.util.Map;
 /**
  * Model for handle error api
  */
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class APIErrorModel {
 
     private LocalDateTime time;

@@ -6,7 +6,7 @@ import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.CategoryEntity;
 import com.tamp_backend.metamodel.CategoryEntity_;
-import com.tamp_backend.model.CategoryModel;
+import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.repository.CategoryRepository;

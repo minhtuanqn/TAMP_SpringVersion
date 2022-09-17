@@ -1,6 +1,6 @@
 package com.tamp_backend.entity;
 
-import com.tamp_backend.model.category.CategoryModel;
+import com.tamp_backend.model.station.StationModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,40 +9,53 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "category")
+@Table(name = "station")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryEntity {
-
-    public CategoryEntity(CategoryModel model) {
+public class StationEntity {
+    public StationEntity(StationModel model) {
         this.id = model.getId();
         this.name = model.getName();
-        this.description = model.getDescription();
-        this.commissionRate = model.getCommissionRate();
+        this.longitude = model.getLongitude();
+        this.latitude = model.getLatitude();
+        this.address = model.getAddress();
+        this.detailAddress = model.getDetailAddress();
+        this.createAt = model.getCreateAt();
         this.status = model.getStatus();
     }
-
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "id", updatable = false, nullable = false)
     @Type(type = "uuid-char")
     private UUID id;
-
     @Column(name = "name")
     private String name;
+    @Column(name = "longitude")
+    private Double longitude;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "latitude")
+    private Double latitude;
 
-    @Column(name = "commission_rate")
-    private Double commissionRate;
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "detail_address")
+    private String detailAddress;
+
+    @Column(name = "create_at")
+    private LocalDateTime createAt;
 
     @Column(name = "status")
-    private Integer status;
+    private int status;
+
+
+
 }
