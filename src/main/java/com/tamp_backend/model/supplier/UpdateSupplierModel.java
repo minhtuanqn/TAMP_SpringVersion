@@ -1,6 +1,7 @@
 package com.tamp_backend.model.supplier;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.tamp_backend.constant.EntityStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,5 +28,5 @@ public class UpdateSupplierModel {
     private String address;
 
     @JsonProperty("supplierStatus")
-    private int status;
+    private EntityStatusEnum.AccountStatusEnum status;
 }

@@ -5,10 +5,13 @@ import com.tamp_backend.constant.UserEnum;
 import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.AccountEntity;
+import com.tamp_backend.entity.CategoryEntity;
 import com.tamp_backend.entity.SupplierEntity;
 import com.tamp_backend.entity.WalletEntity;
+import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
 import com.tamp_backend.model.supplier.SupplierModel;
+import com.tamp_backend.model.supplier.UpdateSupplierModel;
 import com.tamp_backend.model.systemaccount.AccountModel;
 import com.tamp_backend.repository.AccountRepository;
 import com.tamp_backend.repository.SupplierRepository;
@@ -49,6 +52,7 @@ public class SupplierService {
      * @return supplier
      */
     public SupplierModel createSupplier(CreateSupplierModel createSupplierModel, String logoUrl) {
+        //Check existed username or email in DB
         if (accountRepository.existsByUsername(createSupplierModel.getUsername()))
             throw new DuplicatedEntityException("This username existed");
         if (accountRepository.existsByEmail(createSupplierModel.getEmail()))
@@ -148,5 +152,35 @@ public class SupplierService {
            supplierModels.add(supplierModel);
         }
         return  supplierModels;
+    }
+
+    public SupplierModel updateSupplier(UpdateSupplierModel updateSupplierModel, String logoUrl) {
+        //Check existed supplier
+        Optional<SupplierEntity> optionalSupplierEntity = supplierRepository.findById(updateSupplierModel.getId());
+        SupplierEntity supplierEntity = optionalSupplierEntity.orElseThrow(() -> new NoSuchEntityException("Not found supplier with id"));
+
+        //Check existed account of supplier
+        Optional<AccountEntity> optionalAccountEntity = accountRepository.findById(supplierEntity.getAccountId());
+        AccountEntity accountEntity = optionalAccountEntity.orElseThrow(() -> new NoSuchEntityException("Not found account of supplier with id"));
+
+        //Save supplier information
+        if(logoUrl != null) supplierEntity.setLogo(logoUrl);
+        supplierEntity.setAddress(updateSupplierModel.getAddress());
+        supplierEntity.setName(updateSupplierModel.getName());
+        supplierEntity.setStatus(updateSupplierModel.getStatus().ordinal());
+        supplierEntity.setDescription(updateSupplierModel.getDescription());
+        supplierEntity.setPhone(updateSupplierModel.getPhone());
+        supplierEntity.setUpdateAt(LocalDateTime.now());
+        SupplierEntity savedSupplier = supplierRepository.save(supplierEntity);
+
+        //Save account information of supplier
+        accountEntity.setStatus(updateSupplierModel.getStatus().ordinal());
+        accountEntity.setEmail(updateSupplierModel.getEmail());
+        AccountEntity savedAccount = accountRepository.save(accountEntity);
+
+        //Prepare model for response
+        SupplierModel updatedSupplierModel = modelMapper.map(savedSupplier, SupplierModel.class);
+        updatedSupplierModel.setAccountModel(modelMapper.map(savedAccount, AccountModel.class));
+        return updatedSupplierModel;
     }
 }

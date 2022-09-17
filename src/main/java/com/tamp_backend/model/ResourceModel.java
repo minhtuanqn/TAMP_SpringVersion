@@ -8,10 +8,12 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- *
  * Model for response pagination
  */
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ResourceModel<T> {
     private int pageIndex;
     private int totalPage;

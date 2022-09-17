@@ -1,8 +1,10 @@
 package com.tamp_backend.controller;
 
 import com.tamp_backend.model.ResponseModel;
+import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
 import com.tamp_backend.model.supplier.SupplierModel;
+import com.tamp_backend.model.supplier.UpdateSupplierModel;
 import com.tamp_backend.service.SupplierService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -86,4 +88,22 @@ public class SupplierController {
                 .message("OK");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }
+
+    /**
+     * Update supplier
+     * @param requestModel
+     * @param logo
+     * @return updated supplier model
+     */
+    @PutMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> updateSupplier(@Valid @ModelAttribute UpdateSupplierModel requestModel, @RequestPart MultipartFile logo) {
+        SupplierModel updatedModel = supplierService.updateSupplier(requestModel, null);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(updatedModel)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+
 }
