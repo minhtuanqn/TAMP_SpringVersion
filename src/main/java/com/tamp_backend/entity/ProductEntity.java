@@ -6,19 +6,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "supplier")
+@Table(name = "product")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SupplierEntity {
+public class ProductEntity {
+
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
@@ -26,38 +27,36 @@ public class SupplierEntity {
     @Type(type = "uuid-char")
     private UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "supplier_id", nullable = false)
+    private SupplierEntity supplierEntity;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "category_id", nullable = false)
+    private CategoryEntity categoryEntity;
+
     @Column(name = "name")
     private String name;
-
-    @Column(name = "phone")
-    private String phone;
-
-    @Column(name = "logo")
-    private String logo;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "address")
-    private String address;
+    @Column(name = "default_price")
+    private double defaultPrice;
+
+    @Column(name = "img_list")
+    private String imgList;
 
     @Column(name = "create_at")
     private LocalDateTime createAt;
 
-    @Column(name = "create_by")
-    @Type(type = "uuid-char")
-    private UUID createBy;
-
     @Column(name = "update_at")
     private LocalDateTime updateAt;
 
-    @Column(name = "account_id")
-    @Type(type = "uuid-char")
-    private UUID accountId;
+    @Nullable
+    @Column(name = "approved_by")
+    private UUID approvedBy;
 
     @Column(name = "status")
     private int status;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "supplierEntity")
-    private Set<ProductEntity> productList;
 }

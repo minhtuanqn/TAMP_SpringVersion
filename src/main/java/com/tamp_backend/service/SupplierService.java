@@ -12,7 +12,6 @@ import com.tamp_backend.entity.WalletEntity;
 import com.tamp_backend.metamodel.SupplierEntity_;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
-import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
 import com.tamp_backend.model.supplier.SupplierFilterModel;
 import com.tamp_backend.model.supplier.SupplierModel;

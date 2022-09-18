@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -18,14 +19,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryEntity {
-
-    public CategoryEntity(CategoryModel model) {
-        this.id = model.getId();
-        this.name = model.getName();
-        this.description = model.getDescription();
-        this.commissionRate = model.getCommissionRate();
-        this.status = model.getStatus();
-    }
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -45,4 +38,7 @@ public class CategoryEntity {
 
     @Column(name = "status")
     private Integer status;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "categoryEntity")
+    private Set<ProductEntity> productList;
 }
