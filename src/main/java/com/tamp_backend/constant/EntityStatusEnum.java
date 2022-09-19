@@ -44,4 +44,15 @@ public class EntityStatusEnum {
         DISABLE, //0
         ACTIVE, //1
     }
+
+    /**
+     * Status of product entity
+     */
+    public enum ProductStatusEnum
+    {
+        DELETED, // 0
+        ACTIVE, //1
+        PENDING, //2
+        REJECTED, //3
+    }
 }

@@ -10,6 +10,7 @@ import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.repository.CategoryRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,10 +24,13 @@ import java.util.UUID;
 public class CategoryService {
 
     private CategoryRepository categoryRepository;
+    private ModelMapper modelMapper;
 
-    public CategoryService(CategoryRepository categoryRepository)
+    public CategoryService(CategoryRepository categoryRepository,
+                           ModelMapper modelMapper)
     {
         this.categoryRepository = categoryRepository;
+        this.modelMapper = modelMapper;
     }
 
     /**
@@ -41,12 +45,12 @@ public class CategoryService {
         }
 
         //Prepare entity
-        CategoryEntity entity = new CategoryEntity(model);
+        CategoryEntity entity = modelMapper.map(model, CategoryEntity.class);
         entity.setStatus(EntityStatusEnum.CategoryStatusEnum.ACTIVE.ordinal());
 
         //Save entity to DB
         CategoryEntity savedEntity = categoryRepository.save(entity);
-        model = new CategoryModel(savedEntity);
+        model = modelMapper.map(savedEntity, CategoryModel.class);
 
         return model;
     }
@@ -66,7 +70,7 @@ public class CategoryService {
 
         //Update status of category
         CategoryEntity responseEntity = categoryRepository.save(deletedCategoryEntity);
-        return new CategoryModel(responseEntity);
+        return modelMapper.map(responseEntity, CategoryModel.class);
     }
 
     /**
@@ -78,7 +82,7 @@ public class CategoryService {
         //Find category with id
         Optional<CategoryEntity> searchedCategoryOptional = categoryRepository.findById(id);
         CategoryEntity categoryEntity = searchedCategoryOptional.orElseThrow(() -> new NoSuchEntityException("Not found category"));
-        return new CategoryModel(categoryEntity);
+        return modelMapper.map(categoryEntity, CategoryModel.class);
     }
 
     /**
@@ -90,7 +94,7 @@ public class CategoryService {
     public CategoryModel updateCategory(UUID id, CategoryModel categoryModel) {
         //Find category with id
         Optional<CategoryEntity> searchedCategoryOptional = categoryRepository.findById(id);
-        CategoryEntity searchedCategoryEntity = searchedCategoryOptional.orElseThrow(() -> new NoSuchEntityException("Not found category"));
+        searchedCategoryOptional.orElseThrow(() -> new NoSuchEntityException("Not found category"));
 
         //Check existed category with name then update model
         if(categoryRepository.existsCategoryEntityByNameAndIdNot(categoryModel.getName(), id)) {
@@ -101,8 +105,8 @@ public class CategoryService {
         categoryModel.setId(id);
 
         //Save entity to DB
-        CategoryEntity savedEntity = categoryRepository.save(new CategoryEntity(categoryModel));
-        return new CategoryModel(savedEntity);
+        CategoryEntity savedEntity = categoryRepository.save(modelMapper.map(categoryModel, CategoryEntity.class));
+        return modelMapper.map(savedEntity, CategoryModel.class);
     }
 
     /**
@@ -135,7 +139,7 @@ public class CategoryService {
         //Convert list of categories entity to list of categories model
         List<CategoryModel> categoryModels = new ArrayList<>();
         for (CategoryEntity entity : categoryEntityPage) {
-            categoryModels.add(new CategoryModel(entity));
+            categoryModels.add(modelMapper.map(entity, CategoryModel.class));
         }
 
         //Prepare resource for return

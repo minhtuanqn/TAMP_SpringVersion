@@ -12,7 +12,6 @@ import com.tamp_backend.entity.WalletEntity;
 import com.tamp_backend.metamodel.SupplierEntity_;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
-import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
 import com.tamp_backend.model.supplier.SupplierFilterModel;
 import com.tamp_backend.model.supplier.SupplierModel;
@@ -302,5 +301,19 @@ public class SupplierService {
         resource.setData(supplierModels);
         paginationConvertor.buildPagination(paginationRequestModel, supplierEntityPage, resource);
         return resource;
+    }
+
+    /**
+     * Find supplier by usernmae
+     * @param username
+     * @return supplier model
+     */
+    public SupplierModel findSupplierByUsername(String username) {
+        Optional<AccountEntity> optionalAccountEntity = accountRepository.findByUsername(username);
+        AccountEntity accountEntity = optionalAccountEntity.orElseThrow(() -> new NoSuchEntityException("Not found account with username"));
+
+        Optional<SupplierEntity> optionalSupplierEntity = supplierRepository.findByAccountId(accountEntity.getId());
+        SupplierEntity supplierEntity = optionalSupplierEntity.orElseThrow(() -> new NoSuchEntityException("Not found information of supplier"));
+        return  modelMapper.map(supplierEntity, SupplierModel.class);
     }
 }

@@ -9,16 +9,15 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "supplier")
+@Table(name = "partner")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SupplierEntity {
+public class PartnerEntity {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
@@ -37,6 +36,10 @@ public class SupplierEntity {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "type_id")
+    @Type(type = "uuid-char")
+    private UUID typeId;
 
     @Column(name = "address")
     private String address;
@@ -58,6 +61,4 @@ public class SupplierEntity {
     @Column(name = "status")
     private int status;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "supplierEntity")
-    private Set<ProductEntity> productList;
 }
