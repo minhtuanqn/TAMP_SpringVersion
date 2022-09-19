@@ -1,6 +1,7 @@
 package com.tamp_backend.controller;
 import com.tamp_backend.customexception.ClassCustomException;
 import com.tamp_backend.customexception.SQLCustomException;
+import com.tamp_backend.customexception.UnauthorizationException;
 import com.tamp_backend.model.APIErrorModel;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanExpressionException;
@@ -217,6 +218,20 @@ public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
             ClassCustomException ex) {
         initMap();
         invalidMap.put("Class exception", ex.getMessage());
+        APIErrorModel apiErrorModel = new APIErrorModel(LocalDateTime.now(), HttpStatus.BAD_REQUEST.name(), invalidMap);
+        return new ResponseEntity<>(apiErrorModel, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handle unauthorization
+     * @param ex
+     * @return response entity
+     */
+    @ExceptionHandler({UnauthorizationException.class})
+    public ResponseEntity<Object> handleUnauthrizationException(
+            UnauthorizationException ex) {
+        initMap();
+        invalidMap.put("Unauthorization exception", ex.getMessage());
         APIErrorModel apiErrorModel = new APIErrorModel(LocalDateTime.now(), HttpStatus.BAD_REQUEST.name(), invalidMap);
         return new ResponseEntity<>(apiErrorModel, HttpStatus.BAD_REQUEST);
     }

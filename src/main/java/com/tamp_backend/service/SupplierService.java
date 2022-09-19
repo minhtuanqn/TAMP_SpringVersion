@@ -302,4 +302,18 @@ public class SupplierService {
         paginationConvertor.buildPagination(paginationRequestModel, supplierEntityPage, resource);
         return resource;
     }
+
+    /**
+     * Find supplier by usernmae
+     * @param username
+     * @return supplier model
+     */
+    public SupplierModel findSupplierByUsername(String username) {
+        Optional<AccountEntity> optionalAccountEntity = accountRepository.findByUsername(username);
+        AccountEntity accountEntity = optionalAccountEntity.orElseThrow(() -> new NoSuchEntityException("Not found account with username"));
+
+        Optional<SupplierEntity> optionalSupplierEntity = supplierRepository.findByAccountId(accountEntity.getId());
+        SupplierEntity supplierEntity = optionalSupplierEntity.orElseThrow(() -> new NoSuchEntityException("Not found information of supplier"));
+        return  modelMapper.map(supplierEntity, SupplierModel.class);
+    }
 }
