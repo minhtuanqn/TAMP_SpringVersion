@@ -94,6 +94,7 @@ public class CategoryController {
      * Search categories by name
      * @param searchText
      * @param paginationRequestModel
+     * @param categoryFilterModel
      * @return resource data of category
      */
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
