@@ -15,9 +15,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResourceModel<T> {
+    private String searchText;
     private int pageIndex;
     private int totalPage;
     private int limit;
-    private int totalRecord;
+    private String sortBy;
+    private String sortType;
+    private int totalResult;
     private List<T> data;
 }
