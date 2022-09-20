@@ -27,4 +27,13 @@ public class StatusSearchEnum {
         ACTIVE, //1
         ALL, //2
     }
+
+    /**
+     * Status search enum of affiliator type search status
+     */
+    public enum AffiliatorTypeStatusSearchEnum {
+        DISABLE, //0
+        ACTIVE, //1
+        ALL, //2
+    }
 }
