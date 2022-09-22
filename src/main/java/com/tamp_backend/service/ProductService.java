@@ -10,8 +10,9 @@ import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.customexception.UnauthorizationException;
 import com.tamp_backend.entity.*;
-import com.tamp_backend.metamodel.PartnerEntity_;
+import com.tamp_backend.metamodel.CategoryEntity_;
 import com.tamp_backend.metamodel.ProductEntity_;
+import com.tamp_backend.metamodel.SupplierEntity_;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.model.product.CreateProductModel;
@@ -27,6 +28,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -198,6 +201,38 @@ public class ProductService {
     }
 
     /**
+     * Specification for belong to supplier
+     * @param supplierId
+     * @return belong supplier specification
+     */
+    private Specification<ProductEntity> belongSupplier(UUID supplierId) {
+        return (root, query, criteriaBuilder) -> {
+            Join<SupplierEntity, ProductEntity> productJoins = root.join(ProductEntity_.SUPPLIER_ID);
+            Predicate equalPredicate = supplierId != null
+                    ? criteriaBuilder.equal(productJoins.get(SupplierEntity_.ID), supplierId)
+                    : criteriaBuilder.isNotNull(root.get(SupplierEntity_.ID));
+            query.distinct(true);
+            return equalPredicate;
+        };
+    }
+
+    /**
+     * Specification for belong to category
+     * @param categoryId
+     * @return belong category specification
+     */
+    private Specification<ProductEntity> isCategory(UUID categoryId) {
+        return (root, query, criteriaBuilder) -> {
+            Join<CategoryEntity, ProductEntity> productJoins = root.join(ProductEntity_.CATEGORY_ID);
+            Predicate equalPredicate = categoryId != null
+                    ? criteriaBuilder.equal(productJoins.get(CategoryEntity_.ID), categoryId)
+                    : criteriaBuilder.isNotNull(root.get(CategoryEntity_.ID));
+            query.distinct(true);
+            return equalPredicate;
+        };
+    }
+
+    /**
      * Search and filter product
      * @param searchedValue
      * @param paginationRequestModel
@@ -216,7 +251,9 @@ public class ProductService {
                 .and(statusFilter(productFilterModel.getProductSearchStatusEnum()))
                 .and(containsName(productFilterModel.getProductName()))
                 .and(greaterPriceFilter(productFilterModel))
-                .and(lessThanPriceFilter(productFilterModel)), pageable);
+                .and(lessThanPriceFilter(productFilterModel))
+                .and(belongSupplier(productFilterModel.getSupplierId()))
+                .and(isCategory(productFilterModel.getCategoryId())), pageable);
 
         //Convert list of products entity to list of products model
         List<ProductModel> productModels = new ArrayList<>();

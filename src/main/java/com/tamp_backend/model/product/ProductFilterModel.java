@@ -25,5 +25,5 @@ public class ProductFilterModel {
 
     private boolean priceFilter;
 
-    public int productSearchStatusEnum;
+    private int productSearchStatusEnum;
 }
