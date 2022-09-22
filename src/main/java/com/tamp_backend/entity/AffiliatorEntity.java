@@ -9,16 +9,16 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "partner")
+@Table(name = "affiliator")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PartnerEntity {
+public class AffiliatorEntity {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
@@ -26,31 +26,33 @@ public class PartnerEntity {
     @Type(type = "uuid-char")
     private UUID id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "dob")
+    private Date dob;
 
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "logo")
-    private String logo;
+    @Column(name = "gender")
+    private int gender;
 
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "type_id")
-    @Type(type = "uuid-char")
-    private UUID typeId;
+    @Column(name = "full_name")
+    private String fullName;
 
     @Column(name = "address")
     private String address;
 
+    @Column(name = "avatar")
+    private String avatar;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "partner_id", nullable = false)
+    private PartnerEntity partnerEntity;
+
+    @Column(name = "code")
+    private String code;
+
     @Column(name = "create_at")
     private LocalDateTime createAt;
-
-    @Column(name = "create_by")
-    @Type(type = "uuid-char")
-    private UUID createBy;
 
     @Column(name = "update_at")
     private LocalDateTime updateAt;
@@ -59,9 +61,11 @@ public class PartnerEntity {
     @Type(type = "uuid-char")
     private UUID accountId;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "type_id",nullable = false)
+    @Type(type = "uuid-char")
+    private AffiliatorTypeEntity affiliatorTypeEntity;
+
     @Column(name = "status")
     private int status;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "partnerEntity")
-    private Set<AffiliatorEntity> affiliatorList;
 }

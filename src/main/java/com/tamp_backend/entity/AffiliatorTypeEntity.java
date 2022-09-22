@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -40,4 +41,7 @@ public class AffiliatorTypeEntity {
     private Double commissionRate;
     @Column(name = "status")
     private Integer status;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "affiliatorTypeEntity")
+    private Set<AffiliatorEntity> affiliatorList;
 }

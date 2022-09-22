@@ -6,10 +6,7 @@ import com.tamp_backend.constant.UserEnum;
 import com.tamp_backend.convertor.PaginationConvertor;
 import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
-import com.tamp_backend.entity.AccountEntity;
-import com.tamp_backend.entity.PartnerEntity;
-import com.tamp_backend.entity.PartnerTypeEntity;
-import com.tamp_backend.entity.WalletEntity;
+import com.tamp_backend.entity.*;
 import com.tamp_backend.metamodel.PartnerEntity_;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
@@ -306,6 +303,20 @@ public class PartnerService {
         PartnerModel updatedPartnerModel = modelMapper.map(savedPartner, PartnerModel.class);
         updatedPartnerModel.setAccountModel(modelMapper.map(savedAccount, AccountModel.class));
         return updatedPartnerModel;
+    }
+
+    /**
+     * Find partner by username
+     * @param username
+     * @return partner model
+     */
+    public PartnerModel findPartnerByUsername(String username) {
+        Optional<AccountEntity> optionalAccountEntity = accountRepository.findByUsername(username);
+        AccountEntity accountEntity = optionalAccountEntity.orElseThrow(() -> new NoSuchEntityException("Not found account with username"));
+
+        Optional<PartnerEntity> optionalPartnerEntity = partnerRepository.findByAccountId(accountEntity.getId());
+        PartnerEntity partnerEntity = optionalPartnerEntity.orElseThrow(() -> new NoSuchEntityException("Not found information of partner"));
+        return  modelMapper.map(partnerEntity, PartnerModel.class);
     }
 
 }
