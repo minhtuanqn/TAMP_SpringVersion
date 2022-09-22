@@ -29,6 +29,7 @@ public class RequestPaginationResolver implements HandlerMethodArgumentResolver 
         int limit = PaginationConst.DEFAULT_LIMIT;
         if(page != null) {
             pageIndex = Integer.parseInt(page);
+            pageIndex--;
         }
         if(perPage != null) {
             limit = Integer.parseInt(perPage);

@@ -1,5 +1,4 @@
 package com.tamp_backend.convertor;
-import com.tamp_backend.customexception.NotFoundFieldOfClassException;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import org.springframework.data.domain.Page;
@@ -26,17 +25,22 @@ public class PaginationConvertor<M, E> {
         // Define sort by field for paging
         String sortBy = defaultSortBy;
         if(paginationRequestModel.getSortBy() != null) {
-            if(!checkExistFieldOfClass(classType, paginationRequestModel.getSortBy()))
-                throw new NotFoundFieldOfClassException("Can not define sortBy");
-            sortBy = paginationRequestModel.getSortBy();
+            if(!checkExistFieldOfClass(classType, paginationRequestModel.getSortBy())) {
+                sortBy = defaultSortBy;
+                paginationRequestModel.setSortBy(sortBy);
+            } else {
+                sortBy = paginationRequestModel.getSortBy();
+            }
         }
 
         //Build Pageable
         Pageable pageable;
         if (paginationRequestModel.getSortType() != null && paginationRequestModel.getSortType().equals("dsc")) {
-            pageable = PageRequest.of(paginationRequestModel.getPageIndex(), paginationRequestModel.getLimit(), Sort.by(sortBy).descending());
+            pageable = PageRequest.of(paginationRequestModel.getCurPage(), paginationRequestModel.getPageSize(), Sort.by(sortBy).descending());
+            paginationRequestModel.setSortType("dsc");
         } else {
-            pageable = PageRequest.of(paginationRequestModel.getPageIndex(), paginationRequestModel.getLimit(), Sort.by(sortBy).ascending());
+            pageable = PageRequest.of(paginationRequestModel.getCurPage(), paginationRequestModel.getPageSize(), Sort.by(sortBy).ascending());
+            paginationRequestModel.setSortType("asc");
         }
         return pageable;
     }
@@ -50,9 +54,9 @@ public class PaginationConvertor<M, E> {
      */
     public ResourceModel<M> buildPagination(PaginationRequestModel pagination, Page<E> page, ResourceModel<M> resource) {
         resource.setTotalPage(page.getTotalPages());
-        resource.setTotalRecord((int) page.getTotalElements());
-        resource.setPageIndex(pagination.getPageIndex());
-        resource.setLimit(pagination.getLimit());
+        resource.setTotalResult((int) page.getTotalElements());
+        resource.setPageIndex(pagination.getCurPage() + 1);
+        resource.setLimit(pagination.getPageSize());
         return resource;
     }
 }
