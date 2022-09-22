@@ -110,16 +110,16 @@ public class SupplierController {
 
     /**
      * Search suppliers by name
-     * @param searchedValue
+     * @param searchText
      * @param paginationRequestModel
      * @return resource data of supplier
      */
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<ResponseModel> searchSuppliers(@RequestParam(value = "searchedValue", defaultValue = "") String searchedValue,
+    public ResponseEntity<ResponseModel> searchSuppliers(@RequestParam(value = "searchText", defaultValue = "") String searchText,
                                                    @RequestPagingParam PaginationRequestModel paginationRequestModel,
                                                    @ModelAttribute SupplierFilterModel supplierFilterModel) {
-        ResourceModel<SupplierModel> supplierList = supplierService.searchSuppliers(searchedValue, paginationRequestModel, supplierFilterModel);
+        ResourceModel<SupplierModel> supplierList = supplierService.searchSuppliers(searchText, paginationRequestModel, supplierFilterModel);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(supplierList)
                 .message("OK");

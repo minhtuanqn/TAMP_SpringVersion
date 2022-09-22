@@ -56,11 +56,9 @@ public class PartnerService {
 
     /**
      * Create new partner
-     *
      * @param createPartnerModel
      * @return partner
      */
-
     public PartnerModel createPartner(CreatePartnerModel createPartnerModel, String logoUrl) {
         //Check existed username or email in DB
         if (accountRepository.existsByUsername(createPartnerModel.getUsername()))
@@ -106,7 +104,6 @@ public class PartnerService {
 
     /**
      * Delete a partner by id
-     *
      * @param partnerId
      * @return deleted partner model
      */
@@ -134,7 +131,6 @@ public class PartnerService {
 
     /**
      * Find partner model by id
-     *
      * @param id
      * @return partner model
      */
@@ -155,7 +151,6 @@ public class PartnerService {
 
     /**
      * Delete list of partner
-     *
      * @param ids
      * @return list of deleted partner models
      */
@@ -172,54 +167,49 @@ public class PartnerService {
 
     /**
      * Specification for search name
-     *
      * @param searchedValue
      * @return contains name specification
      */
     private Specification<PartnerEntity> containsName(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(PartnerEntity_.NAME), pattern);
         });
     }
 
     /**
      * Specification for search address
-     *
      * @param searchedValue
      * @return contains address specification
      */
     private Specification<PartnerEntity> containsAddress(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(PartnerEntity_.ADDRESS), pattern);
         });
     }
 
     /**
      * Specification for search phone
-     *
      * @param searchedValue
      * @return contains phone specification
      */
     private Specification<PartnerEntity> containsPhone(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(PartnerEntity_.PHONE), pattern);
         });
     }
 
     /**
      * Specification for filter status
-     *
-     * @param searchedEnum
+     * @param statusType
      * @return status filter specification
      */
-    private Specification<PartnerEntity> statusFilter(StatusSearchEnum.AccountStatusSearchEnum searchedEnum) {
+    private Specification<PartnerEntity> statusFilter(int statusType) {
         return ((root, query, criteriaBuilder) -> {
-            int searchedStatusNum = searchedEnum != null ? searchedEnum.ordinal() : StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal();
-            if (searchedStatusNum < StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal()) {
-                return criteriaBuilder.equal(root.get(PartnerEntity_.STATUS), searchedStatusNum);
+            if (statusType < StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal()) {
+                return criteriaBuilder.equal(root.get(PartnerEntity_.STATUS), statusType);
             } else {
                 return criteriaBuilder.lessThan(root.get(PartnerEntity_.STATUS), StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal());
             }
@@ -228,7 +218,6 @@ public class PartnerService {
 
     /**
      * Search and filter partner
-     *
      * @param searchedValue
      * @param paginationRequestModel
      * @param partnerFilterModel
@@ -241,11 +230,11 @@ public class PartnerService {
         Pageable pageable = paginationConvertor.convertToPageable(paginationRequestModel, defaultSortBy, PartnerEntity.class);
 
         //Find all partners
-        String searchedName = partnerFilterModel.getName() != null ? partnerFilterModel.getName() : "";
-        String searchedAddress = partnerFilterModel.getAddress() != null ? partnerFilterModel.getAddress() : "";
-        String searchedPhone = partnerFilterModel.getPhone() != null ? partnerFilterModel.getPhone() : "";
-
-        Page<PartnerEntity> partnerEntityPage = partnerRepository.findAll(containsName(searchedValue).and(statusFilter(partnerFilterModel.getStatusType())).and(containsAddress(searchedAddress)).and(containsPhone(searchedPhone)).and(containsName(searchedName)), pageable);
+        Page<PartnerEntity> partnerEntityPage = partnerRepository.findAll(containsName(searchedValue)
+                .and(statusFilter(partnerFilterModel.getStatusType()))
+                .and(containsAddress(partnerFilterModel.getAddress()))
+                .and(containsPhone(partnerFilterModel.getPhone()))
+                .and(containsName(partnerFilterModel.getName())), pageable);
 
         //Convert list of partners entity to list of partners model
         List<PartnerModel> partnerModels = new ArrayList<>();
@@ -260,19 +249,19 @@ public class PartnerService {
         //Prepare resource for return
         ResourceModel<PartnerModel> resource = new ResourceModel<>();
         resource.setData(partnerModels);
+        resource.setSearchText(searchedValue);
+        resource.setSortBy(defaultSortBy);
+        resource.setSortType(paginationRequestModel.getSortType());
         paginationConvertor.buildPagination(paginationRequestModel, partnerEntityPage, resource);
         return resource;
     }
 
     /**
      * Update partner
-     *
      * @param updatePartnerModel
      * @param logoUrl
      * @return update partner model
      */
-
-
     public PartnerModel updatePartner(UpdatePartnerModel updatePartnerModel, String logoUrl) {
         //Check existed partner
         Optional<PartnerEntity> optionalPartnerEntity = partnerRepository.findById(updatePartnerModel.getId());

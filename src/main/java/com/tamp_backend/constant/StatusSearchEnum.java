@@ -36,4 +36,16 @@ public class StatusSearchEnum {
         ACTIVE, //1
         ALL, //2
     }
+
+    /**
+     * Status search enum of product type search status
+     */
+    public enum ProductStatusSearchEnum
+    {
+        DELETED, // 0
+        ACTIVE, //1
+        PENDING, //2
+        REJECTED, //3
+        ALL, //4
+    }
 }

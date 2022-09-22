@@ -3,22 +3,36 @@ package com.tamp_backend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tamp_backend.constant.EntityStatusEnum;
+import com.tamp_backend.constant.StatusSearchEnum;
 import com.tamp_backend.constant.UserEnum;
+import com.tamp_backend.convertor.PaginationConvertor;
 import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.customexception.UnauthorizationException;
-import com.tamp_backend.entity.CategoryEntity;
-import com.tamp_backend.entity.ProductEntity;
-import com.tamp_backend.entity.SupplierEntity;
+import com.tamp_backend.entity.*;
+import com.tamp_backend.metamodel.PartnerEntity_;
+import com.tamp_backend.metamodel.ProductEntity_;
+import com.tamp_backend.model.PaginationRequestModel;
+import com.tamp_backend.model.ResourceModel;
+import com.tamp_backend.model.partner.PartnerFilterModel;
+import com.tamp_backend.model.partner.PartnerModel;
 import com.tamp_backend.model.product.CreateProductModel;
+import com.tamp_backend.model.product.ProductFilterModel;
 import com.tamp_backend.model.product.ProductModel;
+import com.tamp_backend.model.product.UpdateProductStatusModel;
+import com.tamp_backend.model.systemaccount.AccountModel;
 import com.tamp_backend.repository.CategoryRepository;
 import com.tamp_backend.repository.ProductRepository;
 import com.tamp_backend.repository.SupplierRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -126,5 +140,141 @@ public class ProductService {
         //Update status of category
         ProductEntity responseEntity = productRepository.save(productEntity);
         return modelMapper.map(responseEntity, ProductModel.class);
+    }
+
+    /**
+     * Specification for search name
+     * @param searchedValue
+     * @return contains name specification
+     */
+    private Specification<ProductEntity> containsName(String searchedValue) {
+        return ((root, query, criteriaBuilder) -> {
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
+            return criteriaBuilder.like(root.get(ProductEntity_.NAME), pattern);
+        });
+    }
+
+    /**
+     * Specification for filter status
+     * @param statusType
+     * @return status filter specification
+     */
+    private Specification<ProductEntity> statusFilter(int statusType) {
+        return ((root, query, criteriaBuilder) -> {
+            if (statusType < StatusSearchEnum.ProductStatusSearchEnum.ALL.ordinal()) {
+                return criteriaBuilder.equal(root.get(PartnerEntity_.STATUS), statusType);
+            } else {
+                return criteriaBuilder.lessThan(root.get(PartnerEntity_.STATUS),
+                        StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal());
+            }
+        });
+    }
+
+    /**
+     * Specification for filter price greater
+     * @param productFilterModel
+     * @return price greater filter specification
+     */
+    private Specification<ProductEntity> greaterPriceFilter(ProductFilterModel productFilterModel) {
+        return ((root, query, criteriaBuilder) -> {
+            if (productFilterModel.isPriceFilter()) {
+                return criteriaBuilder.greaterThanOrEqualTo(root.get(ProductEntity_.DEFAULT_PRICE), productFilterModel.getMinPrice());
+            } else {
+                return criteriaBuilder.greaterThanOrEqualTo(root.get(ProductEntity_.DEFAULT_PRICE), 0);
+            }
+        });
+    }
+
+    /**
+     * Specification for filter price less than
+     * @param productFilterModel
+     * @return price less then filter specification
+     */
+    private Specification<ProductEntity> lessThanPriceFilter(ProductFilterModel productFilterModel) {
+        return ((root, query, criteriaBuilder) -> {
+            if (productFilterModel.isPriceFilter()) {
+                return criteriaBuilder.lessThanOrEqualTo(root.get(ProductEntity_.DEFAULT_PRICE), productFilterModel.getMinPrice());
+            } else {
+                return criteriaBuilder.lessThanOrEqualTo(root.get(ProductEntity_.DEFAULT_PRICE), Double.MAX_VALUE);
+            }
+        });
+    }
+
+    /**
+     * Search and filter product
+     * @param searchedValue
+     * @param paginationRequestModel
+     * @param productFilterModel
+     * @return resource of data
+     */
+    public ResourceModel<ProductModel> searchProducts(String searchedValue, PaginationRequestModel paginationRequestModel,
+                                                      ProductFilterModel productFilterModel) {
+        PaginationConvertor<ProductModel, ProductEntity> paginationConvertor = new PaginationConvertor<>();
+
+        String defaultSortBy = ProductEntity_.NAME;
+        Pageable pageable = paginationConvertor.convertToPageable(paginationRequestModel, defaultSortBy, ProductEntity.class);
+
+        //Find all partners
+        Page<ProductEntity> productEntityPage = productRepository.findAll(containsName(searchedValue)
+                .and(statusFilter(productFilterModel.getProductSearchStatusEnum()))
+                .and(containsName(productFilterModel.getProductName()))
+                .and(greaterPriceFilter(productFilterModel))
+                .and(lessThanPriceFilter(productFilterModel)), pageable);
+
+        //Convert list of products entity to list of products model
+        List<ProductModel> productModels = new ArrayList<>();
+        for (ProductEntity entity : productEntityPage) {
+            ProductModel productModel = modelMapper.map(entity, ProductModel.class);
+            productModels.add(productModel);
+        }
+
+        //Prepare resource for return
+        ResourceModel<ProductModel> resource = new ResourceModel<>();
+        resource.setData(productModels);
+        resource.setSearchText(searchedValue);
+        resource.setSortBy(defaultSortBy);
+        resource.setSortType(paginationRequestModel.getSortType());
+        paginationConvertor.buildPagination(paginationRequestModel, productEntityPage, resource);
+        return resource;
+    }
+
+    /**
+     * Find product model by id
+     * @param id
+     * @return product model
+     */
+    public ProductModel findProductById(UUID id) {
+        //Find product information by id
+        Optional<ProductEntity> optionalProductEntity = productRepository.findById(id);
+        ProductEntity productEntity = optionalProductEntity.orElseThrow(() -> new NoSuchEntityException("Not found product with id"));
+
+        //Return product model
+        ProductModel productModel = modelMapper.map(productEntity, ProductModel.class);
+        return productModel;
+    }
+
+    /**
+     * Change status of product
+     * @param updateProductStatusModel
+     * @return updated product model
+     */
+    public ProductModel updateProductStatus(UpdateProductStatusModel updateProductStatusModel) {
+        //Find product information by id
+        Optional<ProductEntity> optionalProductEntity = productRepository.findById(updateProductStatusModel.getId());
+        ProductEntity productEntity = optionalProductEntity.orElseThrow(() -> new NoSuchEntityException("Not found product with id"));
+
+        //Saved updated product
+        productEntity.setStatus(updateProductStatusModel.getStatus());
+        if(updateProductStatusModel.getStatus() == EntityStatusEnum.ProductStatusEnum.ACTIVE.ordinal()) {
+            productEntity.setApprovedBy(UUID.fromString("e5facdba-b1b5-4077-8483-a9bfbb187955"));
+        }
+        else {
+            productEntity.setApprovedBy(null);
+        }
+        ProductEntity insertProduct = productRepository.save(productEntity);
+
+        //Return product model
+        ProductModel productModel = modelMapper.map(productEntity, ProductModel.class);
+        return productModel;
     }
 }
