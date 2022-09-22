@@ -54,6 +54,7 @@ public class ProductEntity {
     private LocalDateTime updateAt;
 
     @Nullable
+    @Type(type = "uuid-char")
     @Column(name = "approved_by")
     private UUID approvedBy;
 

@@ -18,5 +18,5 @@ public class SupplierFilterModel {
 
     private String address;
 
-    private StatusSearchEnum.AccountStatusSearchEnum statusType;
+    private int statusType;
 }

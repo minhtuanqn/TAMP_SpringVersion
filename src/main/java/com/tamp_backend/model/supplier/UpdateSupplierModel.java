@@ -28,5 +28,5 @@ public class UpdateSupplierModel {
     private String address;
 
     @JsonProperty("supplierStatus")
-    private EntityStatusEnum.AccountStatusEnum status;
+    private int status;
 }
