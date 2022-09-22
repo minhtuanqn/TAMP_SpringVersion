@@ -14,13 +14,10 @@ import com.tamp_backend.metamodel.PartnerEntity_;
 import com.tamp_backend.metamodel.ProductEntity_;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
-import com.tamp_backend.model.partner.PartnerFilterModel;
-import com.tamp_backend.model.partner.PartnerModel;
 import com.tamp_backend.model.product.CreateProductModel;
 import com.tamp_backend.model.product.ProductFilterModel;
 import com.tamp_backend.model.product.ProductModel;
 import com.tamp_backend.model.product.UpdateProductStatusModel;
-import com.tamp_backend.model.systemaccount.AccountModel;
 import com.tamp_backend.repository.CategoryRepository;
 import com.tamp_backend.repository.ProductRepository;
 import com.tamp_backend.repository.SupplierRepository;
@@ -162,10 +159,10 @@ public class ProductService {
     private Specification<ProductEntity> statusFilter(int statusType) {
         return ((root, query, criteriaBuilder) -> {
             if (statusType < StatusSearchEnum.ProductStatusSearchEnum.ALL.ordinal()) {
-                return criteriaBuilder.equal(root.get(PartnerEntity_.STATUS), statusType);
+                return criteriaBuilder.equal(root.get(ProductEntity_.STATUS), statusType);
             } else {
-                return criteriaBuilder.lessThan(root.get(PartnerEntity_.STATUS),
-                        StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal());
+                return criteriaBuilder.lessThan(root.get(ProductEntity_.STATUS),
+                        StatusSearchEnum.ProductStatusSearchEnum.ALL.ordinal());
             }
         });
     }
@@ -193,7 +190,7 @@ public class ProductService {
     private Specification<ProductEntity> lessThanPriceFilter(ProductFilterModel productFilterModel) {
         return ((root, query, criteriaBuilder) -> {
             if (productFilterModel.isPriceFilter()) {
-                return criteriaBuilder.lessThanOrEqualTo(root.get(ProductEntity_.DEFAULT_PRICE), productFilterModel.getMinPrice());
+                return criteriaBuilder.lessThanOrEqualTo(root.get(ProductEntity_.DEFAULT_PRICE), productFilterModel.getMaxPrice());
             } else {
                 return criteriaBuilder.lessThanOrEqualTo(root.get(ProductEntity_.DEFAULT_PRICE), Double.MAX_VALUE);
             }

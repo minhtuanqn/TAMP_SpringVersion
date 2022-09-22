@@ -3,10 +3,12 @@ package com.tamp_backend.service;
 import com.tamp_backend.constant.UserEnum;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.AccountEntity;
+import com.tamp_backend.entity.PartnerEntity;
 import com.tamp_backend.entity.SupplierEntity;
 import com.tamp_backend.entity.SystemAdminEntity;
 import com.tamp_backend.model.systemaccount.AccountDetailsModel;
 import com.tamp_backend.repository.AccountRepository;
+import com.tamp_backend.repository.PartnerRepository;
 import com.tamp_backend.repository.SupplierRepository;
 import com.tamp_backend.repository.SystemAdminRepository;
 import org.springframework.stereotype.Service;
@@ -18,14 +20,17 @@ public class AccountService {
     private AccountRepository accountRepository;
     private SystemAdminRepository systemAdminRepository;
     private SupplierRepository supplierRepository;
+    private PartnerRepository partnerRepository;
 
     public AccountService(AccountRepository accountRepository,
                           SystemAdminRepository systemAdminRepository,
-                          SupplierRepository supplierRepository)
+                          SupplierRepository supplierRepository,
+                          PartnerRepository partnerRepository)
     {
         this.accountRepository = accountRepository;
         this.systemAdminRepository = systemAdminRepository;
         this.supplierRepository = supplierRepository;
+        this.partnerRepository = partnerRepository;
     }
 
     public AccountDetailsModel buildAccountDetailModel(String username) {
@@ -49,7 +54,13 @@ public class AccountService {
                     .userId(supplierEntity.getId())
                     .password(accountEntity.getPassword());
         } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.PARTNER.toString())) {
-
+            Optional<PartnerEntity> optionalPartnerEntity = partnerRepository.findByAccountId(accountEntity.getId());
+            PartnerEntity partnerEntity = optionalPartnerEntity.orElseThrow(() -> new NoSuchEntityException("Not found information of user"));
+            accountDetailsModel.id(accountEntity.getId()).role(accountEntity.getRole())
+                    .email(accountEntity.getEmail())
+                    .username(username)
+                    .userId(partnerEntity.getId())
+                    .password(accountEntity.getPassword());
         } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.SHIPPER.toString())) {
 
         } else if(accountEntity.getRole().equals(UserEnum.RoleEnum.AFFILIATOR.toString())) {
