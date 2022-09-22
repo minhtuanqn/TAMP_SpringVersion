@@ -230,7 +230,7 @@ public class AffiliatorService {
      */
     private Specification<AffiliatorEntity> containsName(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(AffiliatorEntity_.FULL_NAME), pattern);
         });
     }
@@ -243,7 +243,7 @@ public class AffiliatorService {
      */
     private Specification<AffiliatorEntity> containsAddress(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(AffiliatorEntity_.ADDRESS), pattern);
         });
     }
@@ -256,7 +256,7 @@ public class AffiliatorService {
      */
     private Specification<AffiliatorEntity> containsPhone(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(AffiliatorEntity_.PHONE), pattern);
         });
     }
@@ -264,14 +264,13 @@ public class AffiliatorService {
     /**
      * Specification for filter status
      *
-     * @param searchedEnum
+     * @param statusType
      * @return status filter specification
      */
-    private Specification<AffiliatorEntity> statusFilter(StatusSearchEnum.AccountStatusSearchEnum searchedEnum) {
+    private Specification<AffiliatorEntity> statusFilter(int statusType) {
         return ((root, query, criteriaBuilder) -> {
-            int searchedStatusNum = searchedEnum != null ? searchedEnum.ordinal() : StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal();
-            if (searchedStatusNum < StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal()) {
-                return criteriaBuilder.equal(root.get(AffiliatorEntity_.STATUS), searchedStatusNum);
+            if (statusType < StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal()) {
+                return criteriaBuilder.equal(root.get(AffiliatorEntity_.STATUS), statusType);
             } else {
                 return criteriaBuilder.lessThan(root.get(AffiliatorEntity_.STATUS), StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal());
             }
@@ -293,11 +292,11 @@ public class AffiliatorService {
         Pageable pageable = paginationConvertor.convertToPageable(paginationRequestModel, defaultSortBy, AffiliatorEntity.class);
 
         //Find all affiliators
-        String searchedName = affiliatorFilterModel.getFullName() != null ? affiliatorFilterModel.getFullName() : "";
-        String searchedAddress = affiliatorFilterModel.getAddress() != null ? affiliatorFilterModel.getAddress() : "";
-        String searchedPhone = affiliatorFilterModel.getPhone() != null ? affiliatorFilterModel.getPhone() : "";
-
-        Page<AffiliatorEntity> affiliatorEntityPage = affiliatorRepository.findAll(containsName(searchedValue).and(statusFilter(affiliatorFilterModel.getStatusType())).and(containsAddress(searchedAddress)).and(containsPhone(searchedPhone)).and(containsName(searchedName)), pageable);
+        Page<AffiliatorEntity> affiliatorEntityPage = affiliatorRepository.findAll(containsName(searchedValue)
+                .and(statusFilter(affiliatorFilterModel.getStatusType()))
+                .and(containsAddress(affiliatorFilterModel.getAddress()))
+                .and(containsPhone(affiliatorFilterModel.getPhone()))
+                .and(containsName(affiliatorFilterModel.getFullName())), pageable);
 
         //Convert list of affiliators entity to list of affiliators model
         List<AffiliatorModel> affiliatorModels = new ArrayList<>();
@@ -312,6 +311,9 @@ public class AffiliatorService {
         //Prepare resource for return
         ResourceModel<AffiliatorModel> resource = new ResourceModel<>();
         resource.setData(affiliatorModels);
+        resource.setSearchText(searchedValue);
+        resource.setSortBy(defaultSortBy);
+        resource.setSortType(paginationRequestModel.getSortType());
         paginationConvertor.buildPagination(paginationRequestModel, affiliatorEntityPage, resource);
         return resource;
     }
@@ -366,7 +368,7 @@ public class AffiliatorService {
         affiliatorEntity.setUpdateAt(LocalDateTime.now());
         affiliatorEntity.setAffiliatorTypeEntity(affiliatorTypeEntity);
         if (!currentRoleEnum.equals(UserEnum.RoleEnum.AFFILIATOR)) {
-            affiliatorEntity.setStatus(updateAffiliatorModel.getStatus().ordinal());
+            affiliatorEntity.setStatus(updateAffiliatorModel.getStatus());
             affiliatorEntity.setCode(updateAffiliatorModel.getCode());
         }
 
@@ -374,7 +376,7 @@ public class AffiliatorService {
         AffiliatorEntity savedAffiliator = affiliatorRepository.save(affiliatorEntity);
 
         //Save account information of affiliator
-        accountEntity.setStatus(updateAffiliatorModel.getStatus().ordinal());
+        accountEntity.setStatus(updateAffiliatorModel.getStatus());
         accountEntity.setEmail(updateAffiliatorModel.getEmail());
         AccountEntity savedAccount = accountRepository.save(accountEntity);
 

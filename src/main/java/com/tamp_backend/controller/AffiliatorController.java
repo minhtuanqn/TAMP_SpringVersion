@@ -136,14 +136,14 @@ public class AffiliatorController {
     /**
      * Search affiliators by name
      *
-     * @param searchedValue
+     * @param searchText
      * @param paginationRequestModel
      * @return resource data of affiliator
      */
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<ResponseModel> searchAffiliators(@RequestParam(value = "searchedValue", defaultValue = "") String searchedValue, @RequestPagingParam PaginationRequestModel paginationRequestModel, @ModelAttribute AffiliatorFilterModel affiliatorFilterModel) {
-        ResourceModel<AffiliatorModel> affiliatorList = affiliatorService.searchAffiliators(searchedValue, paginationRequestModel, affiliatorFilterModel);
+    public ResponseEntity<ResponseModel> searchAffiliators(@RequestParam(value = "searchText", defaultValue = "") String searchText, @RequestPagingParam PaginationRequestModel paginationRequestModel, @ModelAttribute AffiliatorFilterModel affiliatorFilterModel) {
+        ResourceModel<AffiliatorModel> affiliatorList = affiliatorService.searchAffiliators(searchText, paginationRequestModel, affiliatorFilterModel);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value()).data(affiliatorList).message("OK");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }

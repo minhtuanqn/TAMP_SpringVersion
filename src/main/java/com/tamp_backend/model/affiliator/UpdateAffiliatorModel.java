@@ -35,6 +35,6 @@ public class UpdateAffiliatorModel {
     private UUID typeId;
 
     @JsonProperty("affStatus")
-    private EntityStatusEnum.AccountStatusEnum status;
+    private int status;
 
 }
