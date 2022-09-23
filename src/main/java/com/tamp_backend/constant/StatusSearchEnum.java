@@ -48,4 +48,14 @@ public class StatusSearchEnum {
         REJECTED, //3
         ALL, //4
     }
+
+    /**
+     * Status search enum of station search status
+     */
+    public enum StationStatusSearchEnum
+    {
+        DISABLE, //0
+        ACTIVE, //1
+        ALL, //2
+    }
 }

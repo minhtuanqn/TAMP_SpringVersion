@@ -20,24 +20,16 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StationEntity {
-    public StationEntity(StationModel model) {
-        this.id = model.getId();
-        this.name = model.getName();
-        this.longitude = model.getLongitude();
-        this.latitude = model.getLatitude();
-        this.address = model.getAddress();
-        this.detailAddress = model.getDetailAddress();
-        this.createAt = model.getCreateAt();
-        this.status = model.getStatus();
-    }
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "id", updatable = false, nullable = false)
     @Type(type = "uuid-char")
     private UUID id;
+
     @Column(name = "name")
     private String name;
+
     @Column(name = "longitude")
     private Double longitude;
 
