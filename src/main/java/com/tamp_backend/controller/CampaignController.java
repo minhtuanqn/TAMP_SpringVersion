@@ -1,8 +1,14 @@
 package com.tamp_backend.controller;
 
+import com.tamp_backend.model.PaginationRequestModel;
+import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.model.ResponseModel;
+import com.tamp_backend.model.campaign.CampaignFilterModel;
 import com.tamp_backend.model.campaign.CampaignModel;
 import com.tamp_backend.model.campaign.CreateCampaignModel;
+import com.tamp_backend.model.category.CategoryFilterModel;
+import com.tamp_backend.model.category.CategoryModel;
+import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.CampaignService;
 import com.tamp_backend.service.SystemAdminService;
 import com.tamp_backend.utils.UserUtils;
@@ -31,13 +37,14 @@ public class CampaignController {
 
     /**
      * Create new campaign
-     *
      * @param requestModel
+     * @param avatar
      * @return response entity contains created model
      */
-    @PostMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<ResponseModel> createCampaign(@Valid @ModelAttribute CreateCampaignModel requestModel, @RequestPart MultipartFile avatar) {
+    public ResponseEntity<ResponseModel> createCampaign(@Valid @ModelAttribute CreateCampaignModel requestModel,
+                                                        @RequestPart MultipartFile avatar) {
         String username = UserUtils.getCurUsername();
         UUID adminId = systemAdminService.findSystemAdminByUsername(username).getId();
         CampaignModel savedModel = campaignService.createCampaign(requestModel, "", adminId);
@@ -63,7 +70,7 @@ public class CampaignController {
     }
 
     /**
-     * delete campaign
+     * Delete campaign
      * @param id
      * @return response entity contains deleted model
      */
@@ -73,6 +80,25 @@ public class CampaignController {
         CampaignModel deletedModel = campaignService.deleteCampaign(id);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(deletedModel)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Search categories by name
+     * @param searchText
+     * @param paginationRequestModel
+     * @param campaignFilterModel
+     * @return resource data of category
+     */
+    @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'SUPPLIER', 'PARTNER', 'AFFILIATOR')")
+    public ResponseEntity<ResponseModel> searchCategories(@RequestParam(value = "searchText", defaultValue = "") String searchText,
+                                                          @RequestPagingParam PaginationRequestModel paginationRequestModel,
+                                                          @ModelAttribute CampaignFilterModel campaignFilterModel) {
+        ResourceModel<CampaignModel> campaignList = campaignService.searchCampaigns(searchText, paginationRequestModel, campaignFilterModel);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(campaignList)
                 .message("OK");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }

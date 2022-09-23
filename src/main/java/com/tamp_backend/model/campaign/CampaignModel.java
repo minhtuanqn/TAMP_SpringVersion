@@ -12,12 +12,20 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CampaignModel {
+
     private UUID id;
+
     private String name;
+
     private String description;
+
     private UUID createBy;
+
     private LocalDateTime startTime;
+
     private LocalDateTime endTime;
+
     private String coverPhoto;
+
     private int status;
 }

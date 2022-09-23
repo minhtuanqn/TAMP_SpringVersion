@@ -1,5 +1,6 @@
 package com.tamp_backend.controller;
 import com.tamp_backend.customexception.ClassCustomException;
+import com.tamp_backend.customexception.RangeTimeException;
 import com.tamp_backend.customexception.SQLCustomException;
 import com.tamp_backend.customexception.UnauthorizationException;
 import com.tamp_backend.model.APIErrorModel;
@@ -232,6 +233,20 @@ public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
             UnauthorizationException ex) {
         initMap();
         invalidMap.put("Unauthorization exception", ex.getMessage());
+        APIErrorModel apiErrorModel = new APIErrorModel(LocalDateTime.now(), HttpStatus.BAD_REQUEST.name(), invalidMap);
+        return new ResponseEntity<>(apiErrorModel, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handle range time exception
+     * @param ex
+     * @return response entity
+     */
+    @ExceptionHandler({RangeTimeException.class})
+    public ResponseEntity<Object> handleRangeTimeException(
+            RangeTimeException ex) {
+        initMap();
+        invalidMap.put("Range time exception", ex.getMessage());
         APIErrorModel apiErrorModel = new APIErrorModel(LocalDateTime.now(), HttpStatus.BAD_REQUEST.name(), invalidMap);
         return new ResponseEntity<>(apiErrorModel, HttpStatus.BAD_REQUEST);
     }

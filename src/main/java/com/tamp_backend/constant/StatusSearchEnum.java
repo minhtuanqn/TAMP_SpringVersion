@@ -48,4 +48,14 @@ public class StatusSearchEnum {
         REJECTED, //3
         ALL, //4
     }
+
+    public enum CampaignStatusSearchEnum
+    {
+        DELETED, //0
+        ACTIVE, //1
+        PRODUCT_PREPARING, //2
+        READY, // 3
+        ALL, //4
+        PRODUCT_CAN_ADDED, //5
+    }
 }
