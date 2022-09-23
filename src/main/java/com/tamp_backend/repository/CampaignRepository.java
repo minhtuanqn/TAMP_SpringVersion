@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface CampaignRepository extends CrudRepository<CampaignEntity, UUID>, JpaSpecificationExecutor<CampaignEntity> {
     boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, UUID id);
 }

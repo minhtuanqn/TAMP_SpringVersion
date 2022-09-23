@@ -6,8 +6,10 @@ import com.tamp_backend.model.ResponseModel;
 import com.tamp_backend.model.campaign.CampaignFilterModel;
 import com.tamp_backend.model.campaign.CampaignModel;
 import com.tamp_backend.model.campaign.CreateCampaignModel;
+import com.tamp_backend.model.campaign.UpdateCampaignModel;
 import com.tamp_backend.model.category.CategoryFilterModel;
 import com.tamp_backend.model.category.CategoryModel;
+import com.tamp_backend.model.category.UpdateCategoryModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.CampaignService;
 import com.tamp_backend.service.SystemAdminService;
@@ -93,12 +95,29 @@ public class CampaignController {
      */
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'SUPPLIER', 'PARTNER', 'AFFILIATOR')")
-    public ResponseEntity<ResponseModel> searchCategories(@RequestParam(value = "searchText", defaultValue = "") String searchText,
+    public ResponseEntity<ResponseModel> searchCampaigns(@RequestParam(value = "searchText", defaultValue = "") String searchText,
                                                           @RequestPagingParam PaginationRequestModel paginationRequestModel,
                                                           @ModelAttribute CampaignFilterModel campaignFilterModel) {
         ResourceModel<CampaignModel> campaignList = campaignService.searchCampaigns(searchText, paginationRequestModel, campaignFilterModel);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(campaignList)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Update campaign
+     * @param requestModel
+     * @param avatar
+     * @return response entity contains model
+     */
+    @PutMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> updateCampaign(@ModelAttribute @Valid UpdateCampaignModel requestModel,
+                                                        @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
+        CampaignModel updatedModel = campaignService.updateCampaign(requestModel, "");
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(updatedModel)
                 .message("OK");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }

@@ -13,6 +13,7 @@ import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.model.campaign.CampaignFilterModel;
 import com.tamp_backend.model.campaign.CampaignModel;
 import com.tamp_backend.model.campaign.CreateCampaignModel;
+import com.tamp_backend.model.campaign.UpdateCampaignModel;
 import com.tamp_backend.repository.CampaignRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -186,6 +187,37 @@ public class CampaignService {
         resource.setSortType(paginationRequestModel.getSortType());
         paginationConvertor.buildPagination(paginationRequestModel, campaignEntityPage, resource);
         return resource;
+    }
+
+    /**
+     * Update campaign
+     * @param updateCampaignModel
+     * @return updated campaign
+     */
+    public CampaignModel updateCampaign(UpdateCampaignModel updateCampaignModel, String coverPhoto) {
+        //Find campaign with id
+        Optional<CampaignEntity> optionalCampaignEntity = campaignRepository.findById(updateCampaignModel.getId());
+        CampaignEntity campaignEntity = optionalCampaignEntity.orElseThrow(() -> new NoSuchEntityException("Not found campagin with id"));
+
+        //Check existed campaign with name then update model
+        if(campaignRepository.existsByNameAndIdNot(updateCampaignModel.getName(), updateCampaignModel.getId())) {
+            throw new DuplicatedEntityException("Duplicate name for campagin");
+        }
+
+        // Compare start time and end time
+        if(updateCampaignModel.getStartTime().isAfter(updateCampaignModel.getEndTime()))
+            throw new RangeTimeException("Check start and end time again");
+
+        //Prepare entity for saving
+        if(coverPhoto != null) campaignEntity.setCoverPhoto(coverPhoto);
+        campaignEntity.setName(updateCampaignModel.getName());
+        campaignEntity.setDescription(updateCampaignModel.getDescription());
+        campaignEntity.setStartTime(updateCampaignModel.getStartTime());
+        campaignEntity.setEndTime(updateCampaignModel.getEndTime());
+
+        //Save entity to DB
+        CampaignEntity savedEntity = campaignRepository.save(campaignEntity);
+        return modelMapper.map(savedEntity, CampaignModel.class);
     }
 
 }
