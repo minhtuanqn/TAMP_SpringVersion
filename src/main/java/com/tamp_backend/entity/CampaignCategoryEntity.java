@@ -8,17 +8,15 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "campaign")
+@Table(name = "campaign_category")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CampaignEntity {
+public class CampaignCategoryEntity {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
@@ -26,28 +24,19 @@ public class CampaignEntity {
     @Type(type = "uuid-char")
     private UUID id;
 
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "create_by")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "campaign_id",nullable = false)
     @Type(type = "uuid-char")
-    private UUID createBy;
+    private CampaignEntity campaignEntity;
 
-    @Column(name = "start_time")
-    private LocalDateTime startTime;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "category_id",nullable = false)
+    @Type(type = "uuid-char")
+    private CategoryEntity categoryEntity;
 
-    @Column(name = "end_time")
-    private LocalDateTime endTime;
-
-    @Column(name = "cover_photo")
-    private String coverPhoto;
+    @Column(name = "commission_rate")
+    private double commissionRate;
 
     @Column(name = "status")
     private int status;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "campaignEntity")
-    private Set<CampaignCategoryEntity> campaignCategoryList;
 }

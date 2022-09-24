@@ -7,10 +7,15 @@ import com.tamp_backend.model.campaign.CampaignFilterModel;
 import com.tamp_backend.model.campaign.CampaignModel;
 import com.tamp_backend.model.campaign.CreateCampaignModel;
 import com.tamp_backend.model.campaign.UpdateCampaignModel;
+import com.tamp_backend.model.campaigncategory.CampaignCategoryModel;
+import com.tamp_backend.model.campaigncategory.CampaignCategoryResponseModel;
+import com.tamp_backend.model.campaigncategory.CreateCampaignCategoryModel;
+import com.tamp_backend.model.campaigncategory.UpdateCampaignCategoryModel;
 import com.tamp_backend.model.category.CategoryFilterModel;
 import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.category.UpdateCategoryModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
+import com.tamp_backend.service.CampaignCategoryService;
 import com.tamp_backend.service.CampaignService;
 import com.tamp_backend.service.SystemAdminService;
 import com.tamp_backend.utils.UserUtils;
@@ -23,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,14 +37,17 @@ import java.util.UUID;
 public class CampaignController {
     private CampaignService campaignService;
     private SystemAdminService systemAdminService;
+    private CampaignCategoryService campaignCategoryService;
 
-    public CampaignController(CampaignService campaignService, SystemAdminService systemAdminService) {
+    public CampaignController(CampaignService campaignService, SystemAdminService systemAdminService, CampaignCategoryService campaignCategoryService) {
         this.campaignService = campaignService;
         this.systemAdminService = systemAdminService;
+        this.campaignCategoryService = campaignCategoryService;
     }
 
     /**
      * Create new campaign
+     *
      * @param requestModel
      * @param avatar
      * @return response entity contains created model
@@ -58,6 +67,7 @@ public class CampaignController {
 
     /**
      * Find campaign by id
+     *
      * @param id
      * @return response entity contains model
      */
@@ -73,6 +83,7 @@ public class CampaignController {
 
     /**
      * Delete campaign
+     *
      * @param id
      * @return response entity contains deleted model
      */
@@ -88,6 +99,7 @@ public class CampaignController {
 
     /**
      * Search categories by name
+     *
      * @param searchText
      * @param paginationRequestModel
      * @param campaignFilterModel
@@ -96,8 +108,8 @@ public class CampaignController {
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'SUPPLIER', 'PARTNER', 'AFFILIATOR')")
     public ResponseEntity<ResponseModel> searchCampaigns(@RequestParam(value = "searchText", defaultValue = "") String searchText,
-                                                          @RequestPagingParam PaginationRequestModel paginationRequestModel,
-                                                          @ModelAttribute CampaignFilterModel campaignFilterModel) {
+                                                         @RequestPagingParam PaginationRequestModel paginationRequestModel,
+                                                         @ModelAttribute CampaignFilterModel campaignFilterModel) {
         ResourceModel<CampaignModel> campaignList = campaignService.searchCampaigns(searchText, paginationRequestModel, campaignFilterModel);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(campaignList)
@@ -107,6 +119,7 @@ public class CampaignController {
 
     /**
      * Update campaign
+     *
      * @param requestModel
      * @param avatar
      * @return response entity contains model
@@ -121,4 +134,95 @@ public class CampaignController {
                 .message("OK");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }
+
+    /**
+     * Add categories to campaign
+     *
+     * @param requestModel
+     * @param id
+     * @return response entity contains model
+     */
+    @PostMapping(path = "/{id}/categories", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> addCategoryToCampaign(@Valid @RequestBody CreateCampaignCategoryModel requestModel,
+                                                               @PathVariable UUID id) {
+        List<CampaignCategoryModel> savedModel = campaignCategoryService.addCategoryToCampaign(id, requestModel);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(savedModel)
+                .message("Added successfully");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Delete category from campaign
+     *
+     * @param id
+     * @param categoryId
+     * @return response entity contains model
+     */
+    @DeleteMapping(path = "/{id}/categories/{categoryId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> deleteCategoryFromCampaign(
+            @PathVariable UUID id, @PathVariable UUID categoryId) {
+        CampaignCategoryModel deletedModel = campaignCategoryService.deleteCategoryFromCampaign(id, categoryId);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(deletedModel)
+                .message("Deleted successfully");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Delete category from campaign
+     *
+     * @param id
+     * @param categoryIds
+     * @return response entity contains model
+     */
+    @DeleteMapping(path = "/{id}/categories", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> deleteCategoriesFromCampaign(
+            @PathVariable UUID id, @RequestBody List<UUID> categoryIds) {
+        List<CampaignCategoryModel> deletedModel = campaignCategoryService.deleteCategoriesFromCampaign(id, categoryIds);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(deletedModel)
+                .message("Deleted successfully");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Update category to campaign
+     *
+     * @param requestModel
+     * @param id
+     * @return response entity contains model
+     */
+    @PutMapping(path = "/{id}/categories", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> updateCategoryToCampaign(@Valid @RequestBody UpdateCampaignCategoryModel requestModel,
+                                                                  @PathVariable UUID id) {
+        CampaignCategoryModel savedModel = campaignCategoryService.updateCategoryToCampaign(id, requestModel);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(savedModel)
+                .message("Updated successfully");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Delete category from campaign
+     *
+     * @param id
+     * @param categoryId
+     * @return response entity contains model
+     */
+    @GetMapping(path = "/{id}/categories/{categoryId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'PARTNER','SUPPLIER', 'AFFILIATOR')")
+    public ResponseEntity<ResponseModel> getCategoryByIdOfCampaign(
+            @PathVariable UUID id, @PathVariable UUID categoryId) {
+        CampaignCategoryResponseModel model = campaignCategoryService.findCategoryByIdOfCampaign(id, categoryId);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(model)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
 }

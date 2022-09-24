@@ -65,4 +65,12 @@ public class EntityStatusEnum {
         PRODUCT_PREPARING, //2
         READY, //3
     }
+    /**
+     * Status of campaignCategory entity
+     */
+    public enum CampaignCategoryStatusEnum
+    {
+        DELETED, //0
+        ACTIVE, //1
+    }
 }

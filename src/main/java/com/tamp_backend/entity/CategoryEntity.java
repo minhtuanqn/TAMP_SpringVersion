@@ -41,4 +41,7 @@ public class CategoryEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "categoryEntity")
     private Set<ProductEntity> productList;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "categoryEntity")
+    private Set<CampaignCategoryEntity> campaignCategoryList;
 }
