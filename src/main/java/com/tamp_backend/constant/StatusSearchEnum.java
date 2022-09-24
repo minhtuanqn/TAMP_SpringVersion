@@ -40,8 +40,7 @@ public class StatusSearchEnum {
     /**
      * Status search enum of product type search status
      */
-    public enum ProductStatusSearchEnum
-    {
+    public enum ProductStatusSearchEnum {
         DELETED, // 0
         ACTIVE, //1
         PENDING, //2
@@ -49,8 +48,16 @@ public class StatusSearchEnum {
         ALL, //4
     }
 
-    public enum CampaignStatusSearchEnum
-    {
+    /**
+     * Status search enum of station search status
+     */
+    public enum StationStatusSearchEnum {
+        DISABLE, //0
+        ACTIVE, //1
+        ALL, //2
+    }
+
+    public enum CampaignStatusSearchEnum {
         DELETED, //0
         ACTIVE, //1
         PRODUCT_PREPARING, //2

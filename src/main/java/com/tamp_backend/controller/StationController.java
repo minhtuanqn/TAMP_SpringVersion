@@ -3,6 +3,7 @@ package com.tamp_backend.controller;
 
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
+import com.tamp_backend.model.station.StationFilterModel;
 import com.tamp_backend.model.station.StationModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.StationService;
@@ -83,15 +84,16 @@ public class StationController {
     /**
      * Search stations by name
      *
-     * @param searchedValue
+     * @param searchText
      * @param paginationRequestModel
      * @return resource data of station
      */
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<Object> searchStations(@RequestParam(value = "searchedValue", defaultValue = "") String searchedValue,
-                                                 @RequestPagingParam PaginationRequestModel paginationRequestModel) {
-        ResourceModel<StationModel> stationList = stationService.searchStations(searchedValue, paginationRequestModel);
+    public ResponseEntity<Object> searchStations(@RequestParam(value = "searchText", defaultValue = "") String searchText,
+                                                 @RequestPagingParam PaginationRequestModel paginationRequestModel,
+                                                 @ModelAttribute StationFilterModel stationFilterModel) {
+        ResourceModel<StationModel> stationList = stationService.searchStations(searchText, paginationRequestModel, stationFilterModel);
         return new ResponseEntity<>(stationList, HttpStatus.OK);
     }
 }
