@@ -10,10 +10,7 @@ import com.tamp_backend.entity.CampaignEntity;;
 import com.tamp_backend.metamodel.CampaignEntity_;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
-import com.tamp_backend.model.campaign.CampaignFilterModel;
-import com.tamp_backend.model.campaign.CampaignModel;
-import com.tamp_backend.model.campaign.CreateCampaignModel;
-import com.tamp_backend.model.campaign.UpdateCampaignModel;
+import com.tamp_backend.model.campaign.*;
 import com.tamp_backend.repository.CampaignRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -199,6 +196,10 @@ public class CampaignService {
         Optional<CampaignEntity> optionalCampaignEntity = campaignRepository.findById(updateCampaignModel.getId());
         CampaignEntity campaignEntity = optionalCampaignEntity.orElseThrow(() -> new NoSuchEntityException("Not found campagin with id"));
 
+        //Check condition for update campaign
+        if (campaignEntity.getStatus() != EntityStatusEnum.CampaignStatusEnum.ACTIVE.ordinal())
+            throw new RangeTimeException("Just update campaign when status is active");
+
         //Check existed campaign with name then update model
         if(campaignRepository.existsByNameAndIdNot(updateCampaignModel.getName(), updateCampaignModel.getId())) {
             throw new DuplicatedEntityException("Duplicate name for campagin");
@@ -220,4 +221,40 @@ public class CampaignService {
         return modelMapper.map(savedEntity, CampaignModel.class);
     }
 
+    public CampaignModel updateCampaignStatus(UpdateStatusCampaignModel updateStatusCampaignModel) {
+        //Find campaign with id
+        Optional<CampaignEntity> optionalCampaignEntity = campaignRepository.findById(updateStatusCampaignModel.getCampaignId());
+        CampaignEntity campaignEntity = optionalCampaignEntity.orElseThrow(() -> new NoSuchEntityException("ot found campagin with id"));
+
+        int updatedStatus;
+        EntityStatusEnum.CampaignStatusEnum requestStatusEnum = EntityStatusEnum.CampaignStatusEnum
+                .values()[updateStatusCampaignModel.getCampaignStatus()];
+
+        switch(requestStatusEnum)
+        {
+            case DELETED:
+                updatedStatus = EntityStatusEnum.CampaignStatusEnum.DELETED.ordinal();
+                break;
+            case ACTIVE:
+                if(campaignEntity.getStatus() != EntityStatusEnum.CampaignStatusEnum.ACTIVE.ordinal())
+                    throw new RangeTimeException("Can not update status with status active");
+                updatedStatus = EntityStatusEnum.CampaignStatusEnum.ACTIVE.ordinal();
+                break;
+            case PRODUCT_PREPARING:
+                if (campaignEntity.getStatus() > EntityStatusEnum.CampaignStatusEnum.PRODUCT_PREPARING.ordinal())
+                    throw new RangeTimeException("Status is not suitable");
+                updatedStatus = requestStatusEnum.ordinal();
+                break;
+            case READY:
+                updatedStatus = requestStatusEnum.ordinal();
+                break;
+            default:
+                throw new NoSuchEntityException("Can not found status of campaign");
+        }
+
+        //Save entity to DB
+        campaignEntity.setStatus(updatedStatus);
+        CampaignEntity savedEntity = campaignRepository.save(campaignEntity);
+        return modelMapper.map(savedEntity, CampaignModel.class);
+    }
 }

@@ -3,17 +3,11 @@ package com.tamp_backend.controller;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.model.ResponseModel;
-import com.tamp_backend.model.campaign.CampaignFilterModel;
-import com.tamp_backend.model.campaign.CampaignModel;
-import com.tamp_backend.model.campaign.CreateCampaignModel;
-import com.tamp_backend.model.campaign.UpdateCampaignModel;
+import com.tamp_backend.model.campaign.*;
 import com.tamp_backend.model.campaigncategory.CampaignCategoryModel;
 import com.tamp_backend.model.campaigncategory.CampaignCategoryResponseModel;
 import com.tamp_backend.model.campaigncategory.CreateCampaignCategoryModel;
 import com.tamp_backend.model.campaigncategory.UpdateCampaignCategoryModel;
-import com.tamp_backend.model.category.CategoryFilterModel;
-import com.tamp_backend.model.category.CategoryModel;
-import com.tamp_backend.model.category.UpdateCategoryModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.CampaignCategoryService;
 import com.tamp_backend.service.CampaignService;
@@ -47,15 +41,14 @@ public class CampaignController {
 
     /**
      * Create new campaign
-     *
      * @param requestModel
-     * @param avatar
+     * @param coverPhoto
      * @return response entity contains created model
      */
     @PostMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<ResponseModel> createCampaign(@Valid @ModelAttribute CreateCampaignModel requestModel,
-                                                        @RequestPart MultipartFile avatar) {
+                                                        @RequestPart(value = "coverPhoto", required = false) MultipartFile coverPhoto) {
         String username = UserUtils.getCurUsername();
         UUID adminId = systemAdminService.findSystemAdminByUsername(username).getId();
         CampaignModel savedModel = campaignService.createCampaign(requestModel, "", adminId);
@@ -67,7 +60,6 @@ public class CampaignController {
 
     /**
      * Find campaign by id
-     *
      * @param id
      * @return response entity contains model
      */
@@ -83,7 +75,6 @@ public class CampaignController {
 
     /**
      * Delete campaign
-     *
      * @param id
      * @return response entity contains deleted model
      */
@@ -99,7 +90,6 @@ public class CampaignController {
 
     /**
      * Search categories by name
-     *
      * @param searchText
      * @param paginationRequestModel
      * @param campaignFilterModel
@@ -119,15 +109,14 @@ public class CampaignController {
 
     /**
      * Update campaign
-     *
      * @param requestModel
-     * @param avatar
+     * @param coverPhoto
      * @return response entity contains model
      */
     @PutMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<ResponseModel> updateCampaign(@ModelAttribute @Valid UpdateCampaignModel requestModel,
-                                                        @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
+                                                        @RequestPart(value = "coverPhoto", required = false) MultipartFile coverPhoto) {
         CampaignModel updatedModel = campaignService.updateCampaign(requestModel, "");
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(updatedModel)
@@ -137,7 +126,6 @@ public class CampaignController {
 
     /**
      * Add categories to campaign
-     *
      * @param requestModel
      * @param id
      * @return response entity contains model
@@ -155,7 +143,6 @@ public class CampaignController {
 
     /**
      * Delete category from campaign
-     *
      * @param id
      * @param categoryId
      * @return response entity contains model
@@ -173,7 +160,6 @@ public class CampaignController {
 
     /**
      * Delete category from campaign
-     *
      * @param id
      * @param categoryIds
      * @return response entity contains model
@@ -191,7 +177,6 @@ public class CampaignController {
 
     /**
      * Update category to campaign
-     *
      * @param requestModel
      * @param id
      * @return response entity contains model
@@ -209,7 +194,6 @@ public class CampaignController {
 
     /**
      * Delete category from campaign
-     *
      * @param id
      * @param categoryId
      * @return response entity contains model
@@ -225,4 +209,18 @@ public class CampaignController {
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }
 
+    /**
+     * Update status of campaign
+     * @param requestModel
+     * @return response model contains updated campaign
+     */
+    @PatchMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> updateCampaignStatus(@RequestBody @Valid UpdateStatusCampaignModel requestModel) {
+        CampaignModel updatedModel = campaignService.updateCampaignStatus(requestModel);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(updatedModel)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
 }
