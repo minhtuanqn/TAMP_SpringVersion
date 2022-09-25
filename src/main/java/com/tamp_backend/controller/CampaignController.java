@@ -125,6 +125,21 @@ public class CampaignController {
     }
 
     /**
+     * Update status of campaign
+     * @param requestModel
+     * @return response model contains updated campaign
+     */
+    @PatchMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> updateCampaignStatus(@RequestBody @Valid UpdateStatusCampaignModel requestModel) {
+        CampaignModel updatedModel = campaignService.updateCampaignStatus(requestModel);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(updatedModel)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
      * Add categories to campaign
      * @param requestModel
      * @param id
@@ -209,18 +224,4 @@ public class CampaignController {
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }
 
-    /**
-     * Update status of campaign
-     * @param requestModel
-     * @return response model contains updated campaign
-     */
-    @PatchMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<ResponseModel> updateCampaignStatus(@RequestBody @Valid UpdateStatusCampaignModel requestModel) {
-        CampaignModel updatedModel = campaignService.updateCampaignStatus(requestModel);
-        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
-                .data(updatedModel)
-                .message("OK");
-        return new ResponseEntity<>(responseModel, HttpStatus.OK);
-    }
 }
