@@ -55,6 +55,7 @@ public class EntityStatusEnum {
         PENDING, //2
         REJECTED, //3
     }
+
     /**
      * Status of campaign entity
      */
@@ -65,6 +66,7 @@ public class EntityStatusEnum {
         PRODUCT_PREPARING, //2
         READY, //3
     }
+
     /**
      * Status of campaignCategory entity
      */

@@ -4,10 +4,7 @@ import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.model.ResponseModel;
 import com.tamp_backend.model.campaign.*;
-import com.tamp_backend.model.campaigncategory.CampaignCategoryModel;
-import com.tamp_backend.model.campaigncategory.CampaignCategoryResponseModel;
-import com.tamp_backend.model.campaigncategory.CreateCampaignCategoryModel;
-import com.tamp_backend.model.campaigncategory.UpdateCampaignCategoryModel;
+import com.tamp_backend.model.campaigncategory.*;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.CampaignCategoryService;
 import com.tamp_backend.service.CampaignService;
@@ -224,4 +221,25 @@ public class CampaignController {
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }
 
+    /**
+     * Search category in campaign
+     * @param id
+     * @param searchText
+     * @param paginationRequestModel
+     * @param campaignCategoryFilterModel
+     * @return resource model contains list of campaign categories
+     */
+    @GetMapping(path = "/{id}/categories", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'PARTNER','SUPPLIER', 'AFFILIATOR')")
+    public ResponseEntity<ResponseModel> searchCategoriesOfCampaign(@PathVariable UUID id,
+                                                                    @RequestParam(value = "searchText", defaultValue = "") String searchText,
+                                                                    @RequestPagingParam PaginationRequestModel paginationRequestModel,
+                                                                    @ModelAttribute CampaignCategoryFilterModel campaignCategoryFilterModel) {
+        ResourceModel<CampaignCategoryResponseModel> resourceModel = campaignCategoryService
+                .searchCategoriesInCampaign(searchText, paginationRequestModel, id, campaignCategoryFilterModel);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(resourceModel)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
 }

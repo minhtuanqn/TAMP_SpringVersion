@@ -15,8 +15,8 @@ public class CampaignCategoryEntity_ {
     public static volatile SingularAttribute<CampaignCategoryEntity, Integer> status;
 
     public static final String ID = "id";
-    public static final String CAMPAIGN_ID = "campaignId";
-    public static final String CATEGORY_ID = "categoryId";
+    public static final String CAMPAIGN_ID = "campaignEntity";
+    public static final String CATEGORY_ID = "categoryEntity";
     public static final String COMMISSION_RATE = "commissionRate";
     public static final String STATUS = "status";
 

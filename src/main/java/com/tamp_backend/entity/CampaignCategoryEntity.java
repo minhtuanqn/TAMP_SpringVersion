@@ -26,12 +26,10 @@ public class CampaignCategoryEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "campaign_id",nullable = false)
-    @Type(type = "uuid-char")
     private CampaignEntity campaignEntity;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id",nullable = false)
-    @Type(type = "uuid-char")
     private CategoryEntity categoryEntity;
 
     @Column(name = "commission_rate")

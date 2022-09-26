@@ -57,6 +57,9 @@ public class StatusSearchEnum {
         ALL, //2
     }
 
+    /**
+     * Status search enum of campaign search status
+     */
     public enum CampaignStatusSearchEnum {
         DELETED, //0
         ACTIVE, //1
@@ -64,5 +67,15 @@ public class StatusSearchEnum {
         READY, // 3
         ALL, //4
         PRODUCT_CAN_ADDED, //5
+    }
+
+    /**
+     * Status search enum of campaign category search status
+     */
+    public enum CampaignCategoryStatusSearchEnum
+    {
+        DELETED, //0
+        ACTIVE, //1
+        ALL, //2
     }
 }
