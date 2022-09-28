@@ -75,4 +75,13 @@ public class EntityStatusEnum {
         DELETED, //0
         ACTIVE, //1
     }
+
+    /**
+     * Status of campaignProduct entity
+     */
+    public enum CampaignProductStatusEnum
+    {
+        DELETED, //0
+        ACTIVE, //1
+    }
 }

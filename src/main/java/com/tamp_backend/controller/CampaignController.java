@@ -1,14 +1,15 @@
 package com.tamp_backend.controller;
 
+import com.tamp_backend.constant.UserEnum;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.model.ResponseModel;
 import com.tamp_backend.model.campaign.*;
 import com.tamp_backend.model.campaigncategory.*;
+import com.tamp_backend.model.campaignproduct.CampaignProductModel;
+import com.tamp_backend.model.campaignproduct.CreateCampaignProductModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
-import com.tamp_backend.service.CampaignCategoryService;
-import com.tamp_backend.service.CampaignService;
-import com.tamp_backend.service.SystemAdminService;
+import com.tamp_backend.service.*;
 import com.tamp_backend.utils.UserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,11 +30,19 @@ public class CampaignController {
     private CampaignService campaignService;
     private SystemAdminService systemAdminService;
     private CampaignCategoryService campaignCategoryService;
+    private CampaignProductService campaignProductService;
+    private SupplierService supplierService;
 
-    public CampaignController(CampaignService campaignService, SystemAdminService systemAdminService, CampaignCategoryService campaignCategoryService) {
+    public CampaignController(CampaignService campaignService,
+                              SystemAdminService systemAdminService,
+                              CampaignCategoryService campaignCategoryService,
+                              SupplierService supplierService,
+                              CampaignProductService campaignProductService) {
         this.campaignService = campaignService;
         this.systemAdminService = systemAdminService;
         this.campaignCategoryService = campaignCategoryService;
+        this.campaignProductService = campaignProductService;
+        this.supplierService = supplierService;
     }
 
     /**
@@ -240,6 +249,27 @@ public class CampaignController {
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(resourceModel)
                 .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Add products to campaign
+     * @param requestModel
+     * @param id
+     * @return response model containes list of added campaign products
+     */
+    @PostMapping(path = "/{id}/products", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAuthority('SUPPLIER')")
+    public ResponseEntity<ResponseModel> addProductsToCampaign(@Valid @RequestBody CreateCampaignProductModel requestModel,
+                                                               @PathVariable UUID id) {
+        String username = UserUtils.getCurUsername();
+        String role = UserUtils.getCurRole();
+        UUID supplierId = supplierService.findSupplierByUsername(username).getId();
+        List<CampaignProductModel> savedModels = campaignProductService
+                .addProductsToCampaign(id, requestModel, Enum.valueOf(UserEnum.RoleEnum.class, role), supplierId);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(savedModels)
+                .message("Added successfully");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }
 }
