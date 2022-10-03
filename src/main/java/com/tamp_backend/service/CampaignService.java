@@ -6,33 +6,42 @@ import com.tamp_backend.convertor.PaginationConvertor;
 import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.customexception.RangeTimeException;
-import com.tamp_backend.entity.CampaignEntity;;
-import com.tamp_backend.metamodel.CampaignEntity_;
+import com.tamp_backend.entity.*;
+;
+import com.tamp_backend.metamodel.*;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.model.campaign.*;
+import com.tamp_backend.model.suppliercampaign.SupplierCampaignFilterModel;
 import com.tamp_backend.repository.CampaignRepository;
+import com.tamp_backend.repository.ProductRepository;
+import com.tamp_backend.repository.SupplierRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class CampaignService {
     private CampaignRepository campaignRepository;
-
     private ModelMapper modelMapper;
+    private SupplierRepository supplierRepository;
+    private ProductRepository productRepository;
 
-    public CampaignService(CampaignRepository campaignRepository, ModelMapper modelMapper) {
+    public CampaignService(CampaignRepository campaignRepository,
+                           ModelMapper modelMapper,
+                           SupplierRepository supplierRepository,
+                           ProductRepository productRepository) {
         this.campaignRepository = campaignRepository;
         this.modelMapper = modelMapper;
+        this.supplierRepository = supplierRepository;
+        this.productRepository = productRepository;
     }
 
     /**
@@ -151,6 +160,31 @@ public class CampaignService {
     }
 
     /**
+     * Specification for joining campaigns of supplier
+     * @param supplierId
+     * @return specification
+     */
+    private Specification<CampaignEntity> isJoinedCampaign(UUID supplierId, StatusSearchEnum.SupplierCampaignSearchStatusEnum type) {
+        return ((root, query, criteriaBuilder) -> {
+            query.distinct(true);
+            Join<CampaignEntity, CampaignProductEntity> campaignJoins = root.join(CampaignProductEntity_.CAMPAIGN_ID);
+            Join<CampaignProductEntity, ProductEntity> productCampaignJoins = root.join(CampaignProductEntity_.PRODUCT_ID);
+            Join<ProductEntity, SupplierEntity> supplierProductJoins = root.join(ProductEntity_.SUPPLIER_ID);
+            if(type.ordinal() == StatusSearchEnum.SupplierCampaignSearchStatusEnum.JOIN.ordinal()) {
+                Predicate belongSupplier = criteriaBuilder.equal(supplierProductJoins.get(ProductEntity_.SUPPLIER_ID), supplierId);
+                Predicate joinCondition = criteriaBuilder.equal(productCampaignJoins.get(ProductEntity_.ID), supplierProductJoins.get(ProductEntity_.ID));
+                return criteriaBuilder.and(belongSupplier, joinCondition);
+            } else if(type.ordinal() == StatusSearchEnum.SupplierCampaignSearchStatusEnum.NOT_JOIN.ordinal()) {
+                Predicate belongSupplier = criteriaBuilder.equal(supplierProductJoins.get(ProductEntity_.SUPPLIER_ID), supplierId);
+                Predicate joinCondition = criteriaBuilder.notEqual(productCampaignJoins.get(ProductEntity_.ID), supplierProductJoins.get(ProductEntity_.ID));
+                return criteriaBuilder.and(belongSupplier, joinCondition);
+            } else {
+                return criteriaBuilder.lessThan(root.get(CampaignEntity_.STATUS), StatusSearchEnum.CampaignStatusSearchEnum.ALL.ordinal());
+            }
+        });
+    }
+
+    /**
      * search campaign with condition
      * @param searchedValue
      * @param paginationRequestModel
@@ -221,6 +255,11 @@ public class CampaignService {
         return modelMapper.map(savedEntity, CampaignModel.class);
     }
 
+    /**
+     * Change stage of campaign
+     * @param updateStatusCampaignModel
+     * @return updated campaign model
+     */
     public CampaignModel updateCampaignStatus(UpdateStatusCampaignModel updateStatusCampaignModel) {
         //Find campaign with id
         Optional<CampaignEntity> optionalCampaignEntity = campaignRepository.findById(updateStatusCampaignModel.getCampaignId());
@@ -256,5 +295,45 @@ public class CampaignService {
         campaignEntity.setStatus(updatedStatus);
         CampaignEntity savedEntity = campaignRepository.save(campaignEntity);
         return modelMapper.map(savedEntity, CampaignModel.class);
+    }
+
+    /**
+     * Search campaign of supplier
+     * @param searchedValue
+     * @param paginationRequestModel
+     * @param supplierCampaignFilterModel
+     * @param supplierId
+     * @return searched campaigns resource
+     */
+    public ResourceModel<CampaignModel> searchCampaignsOfSupplier(String searchedValue, PaginationRequestModel paginationRequestModel,
+                                                                  SupplierCampaignFilterModel supplierCampaignFilterModel, UUID supplierId) {
+        PaginationConvertor<CampaignModel, CampaignEntity> paginationConvertor = new PaginationConvertor<>();
+
+        String defaultSortBy = CampaignEntity_.NAME;
+        Pageable pageable = paginationConvertor.convertToPageable(paginationRequestModel, defaultSortBy, CampaignEntity.class);
+
+        //Find all campaigns
+        Page<CampaignEntity> campaignEntityPage = campaignRepository.findAll(containsName(searchedValue)
+                .and(hasStatus(supplierCampaignFilterModel.getStatusType()))
+                .and(containsName(supplierCampaignFilterModel.getName()))
+                .and(isSoonerThanStartTime(supplierCampaignFilterModel.isFilterTime(), supplierCampaignFilterModel.getMinTime()))
+                .and(isLaterThenEndTime(supplierCampaignFilterModel.isFilterTime(), supplierCampaignFilterModel.getMaxTime()))
+                .and(isJoinedCampaign(supplierId,
+                        StatusSearchEnum.SupplierCampaignSearchStatusEnum.values()[supplierCampaignFilterModel.getSupplierCampaignStatus()])), pageable);
+
+        //Convert list of campaigns entity to list of campaigns model
+        List<CampaignModel> campaignModels = new ArrayList<>();
+        for (CampaignEntity entity : campaignEntityPage) {
+            campaignModels.add(modelMapper.map(entity, CampaignModel.class));
+        }
+
+        //Prepare resource for return
+        ResourceModel<CampaignModel> resource = new ResourceModel<>();
+        resource.setData(campaignModels);
+        resource.setSearchText(searchedValue);
+        resource.setSortBy(defaultSortBy);
+        resource.setSortType(paginationRequestModel.getSortType());
+        paginationConvertor.buildPagination(paginationRequestModel, campaignEntityPage, resource);
+        return resource;
     }
 }

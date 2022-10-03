@@ -72,10 +72,18 @@ public class StatusSearchEnum {
     /**
      * Status search enum of campaign category search status
      */
-    public enum CampaignCategoryStatusSearchEnum
-    {
+    public enum CampaignCategoryStatusSearchEnum {
         DELETED, //0
         ACTIVE, //1
+        ALL, //2
+    }
+
+    /**
+     * Status search enum of campaign which supplier joins
+     */
+    public  enum SupplierCampaignSearchStatusEnum {
+        NOT_JOIN, //0
+        JOIN, //1
         ALL, //2
     }
 }
