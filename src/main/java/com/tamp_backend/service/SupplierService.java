@@ -185,14 +185,14 @@ public class SupplierService {
         if (logoUrl != null) supplierEntity.setLogo(logoUrl);
         supplierEntity.setAddress(updateSupplierModel.getAddress());
         supplierEntity.setName(updateSupplierModel.getName());
-        supplierEntity.setStatus(updateSupplierModel.getStatus().ordinal());
+        supplierEntity.setStatus(updateSupplierModel.getStatus());
         supplierEntity.setDescription(updateSupplierModel.getDescription());
         supplierEntity.setPhone(updateSupplierModel.getPhone());
         supplierEntity.setUpdateAt(LocalDateTime.now());
         SupplierEntity savedSupplier = supplierRepository.save(supplierEntity);
 
         //Save account information of supplier
-        accountEntity.setStatus(updateSupplierModel.getStatus().ordinal());
+        accountEntity.setStatus(updateSupplierModel.getStatus());
         accountEntity.setEmail(updateSupplierModel.getEmail());
         AccountEntity savedAccount = accountRepository.save(accountEntity);
 
@@ -210,7 +210,7 @@ public class SupplierService {
      */
     private Specification<SupplierEntity> containsName(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(SupplierEntity_.NAME), pattern);
         });
     }
@@ -223,7 +223,7 @@ public class SupplierService {
      */
     private Specification<SupplierEntity> containsAddress(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(SupplierEntity_.ADDRESS), pattern);
         });
     }
@@ -236,7 +236,7 @@ public class SupplierService {
      */
     private Specification<SupplierEntity> containsPhone(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(SupplierEntity_.PHONE), pattern);
         });
     }
@@ -244,16 +244,13 @@ public class SupplierService {
     /**
      * Specification for filter status
      *
-     * @param searchedEnum
+     * @param searchStatus
      * @return status filter specification
      */
-    private Specification<SupplierEntity> statusFilter(StatusSearchEnum.AccountStatusSearchEnum searchedEnum) {
+    private Specification<SupplierEntity> statusFilter(int searchStatus) {
         return ((root, query, criteriaBuilder) -> {
-            int searchedStatusNum = searchedEnum != null
-                    ? searchedEnum.ordinal()
-                    : StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal();
-            if (searchedStatusNum < StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal()) {
-                return criteriaBuilder.equal(root.get(SupplierEntity_.STATUS), searchedStatusNum);
+            if (searchStatus < StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal()) {
+                return criteriaBuilder.equal(root.get(SupplierEntity_.STATUS), searchStatus);
             } else {
                 return criteriaBuilder.lessThan(root.get(SupplierEntity_.STATUS), StatusSearchEnum.AccountStatusSearchEnum.ALL.ordinal());
             }
@@ -275,23 +272,20 @@ public class SupplierService {
         Pageable pageable = paginationConvertor.convertToPageable(paginationRequestModel, defaultSortBy, SupplierEntity.class);
 
         //Find all suppliers
-        String searchedName = supplierFilterModel.getName() != null ? supplierFilterModel.getName() : "";
-        String searchedAddress = supplierFilterModel.getAddress() != null ? supplierFilterModel.getAddress() : "";
-        String searchedPhone = supplierFilterModel.getPhone() != null ? supplierFilterModel.getPhone() : "";
-
         Page<SupplierEntity> supplierEntityPage = supplierRepository.findAll(
                 containsName(searchedValue)
                         .and(statusFilter(supplierFilterModel.getStatusType()))
-                        .and(containsAddress(searchedAddress))
-                        .and(containsPhone(searchedPhone))
-                        .and(containsName(searchedName)), pageable);
+                        .and(containsAddress(supplierFilterModel.getAddress()))
+                        .and(containsPhone(supplierFilterModel.getPhone()))
+                        .and(containsName(supplierFilterModel.getName())), pageable);
 
         //Convert list of suppliers entity to list of suppliers model
         List<SupplierModel> supplierModels = new ArrayList<>();
         for (SupplierEntity entity : supplierEntityPage) {
             SupplierModel supplierModel = modelMapper.map(entity, SupplierModel.class);
             Optional<AccountEntity> optionalAccountEntity = accountRepository.findById(entity.getAccountId());
-            AccountEntity accountEntity = optionalAccountEntity.orElseThrow(() -> new NoSuchEntityException("Not found account of supplier with id"));
+            AccountEntity accountEntity = optionalAccountEntity
+                    .orElseThrow(() -> new NoSuchEntityException("Not found account of supplier with id"));
             supplierModel.setAccountModel(modelMapper.map(accountEntity, AccountModel.class));
             supplierModels.add(supplierModel);
         }
@@ -299,6 +293,9 @@ public class SupplierService {
         //Prepare resource for return
         ResourceModel<SupplierModel> resource = new ResourceModel<>();
         resource.setData(supplierModels);
+        resource.setSearchText(searchedValue);
+        resource.setSortBy(defaultSortBy);
+        resource.setSortType(paginationRequestModel.getSortType());
         paginationConvertor.buildPagination(paginationRequestModel, supplierEntityPage, resource);
         return resource;
     }

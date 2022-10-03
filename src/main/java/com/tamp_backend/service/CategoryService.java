@@ -1,14 +1,18 @@
 package com.tamp_backend.service;
 
 import com.tamp_backend.constant.EntityStatusEnum;
+import com.tamp_backend.constant.StatusSearchEnum;
 import com.tamp_backend.convertor.PaginationConvertor;
 import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.CategoryEntity;
 import com.tamp_backend.metamodel.CategoryEntity_;
+import com.tamp_backend.model.category.CategoryFilterModel;
 import com.tamp_backend.model.category.CategoryModel;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
+import com.tamp_backend.model.category.CreateCategoryModel;
+import com.tamp_backend.model.category.UpdateCategoryModel;
 import com.tamp_backend.repository.CategoryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -35,24 +39,24 @@ public class CategoryService {
 
     /**
      * create a category
-     * @param model
+     * @param createCategoryModel
      * @return created model
      */
-    public CategoryModel createCategory(CategoryModel model) {
+    public CategoryModel createCategory(CreateCategoryModel createCategoryModel) {
         //Check existed category
-        if(categoryRepository.existsCategoryEntityByName(model.getName())) {
-            throw new DuplicatedEntityException("This category has been existed");
+        if(categoryRepository.existsCategoryEntityByName(createCategoryModel.getName())) {
+            throw new DuplicatedEntityException("Duplicated name of category");
         }
 
         //Prepare entity
-        CategoryEntity entity = modelMapper.map(model, CategoryEntity.class);
+        CategoryEntity entity = modelMapper.map(createCategoryModel, CategoryEntity.class);
         entity.setStatus(EntityStatusEnum.CategoryStatusEnum.ACTIVE.ordinal());
 
         //Save entity to DB
         CategoryEntity savedEntity = categoryRepository.save(entity);
-        model = modelMapper.map(savedEntity, CategoryModel.class);
+        CategoryModel  responseCategoryModel = modelMapper.map(savedEntity, CategoryModel.class);
 
-        return model;
+        return responseCategoryModel;
     }
 
     /**
@@ -63,7 +67,7 @@ public class CategoryService {
     public CategoryModel deleteCategory(UUID id) {
         //Find category with id
         Optional<CategoryEntity> deletedCategoryOptional = categoryRepository.findById(id);
-        CategoryEntity deletedCategoryEntity = deletedCategoryOptional.orElseThrow(() -> new NoSuchEntityException("Not found category"));
+        CategoryEntity deletedCategoryEntity = deletedCategoryOptional.orElseThrow(() -> new NoSuchEntityException("Not found category with id"));
 
         //Set status for entity
         deletedCategoryEntity.setStatus(EntityStatusEnum.CategoryStatusEnum.DISABLE.ordinal());
@@ -87,25 +91,21 @@ public class CategoryService {
 
     /**
      * Update category
-     * @param id
-     * @param categoryModel
+     * @param updateCategoryModel
      * @return updated category
      */
-    public CategoryModel updateCategory(UUID id, CategoryModel categoryModel) {
+    public CategoryModel updateCategory(UpdateCategoryModel updateCategoryModel) {
         //Find category with id
-        Optional<CategoryEntity> searchedCategoryOptional = categoryRepository.findById(id);
-        searchedCategoryOptional.orElseThrow(() -> new NoSuchEntityException("Not found category"));
+        Optional<CategoryEntity> searchedCategoryOptional = categoryRepository.findById(updateCategoryModel.getId());
+        searchedCategoryOptional.orElseThrow(() -> new NoSuchEntityException("Not found category with id"));
 
         //Check existed category with name then update model
-        if(categoryRepository.existsCategoryEntityByNameAndIdNot(categoryModel.getName(), id)) {
-            throw new DuplicatedEntityException("This category existed");
+        if(categoryRepository.existsCategoryEntityByNameAndIdNot(updateCategoryModel.getName(), updateCategoryModel.getId())) {
+            throw new DuplicatedEntityException("Duplicate name for category");
         }
 
-        //Prepare entity for saving to DB
-        categoryModel.setId(id);
-
         //Save entity to DB
-        CategoryEntity savedEntity = categoryRepository.save(modelMapper.map(categoryModel, CategoryEntity.class));
+        CategoryEntity savedEntity = categoryRepository.save(modelMapper.map(updateCategoryModel, CategoryEntity.class));
         return modelMapper.map(savedEntity, CategoryModel.class);
     }
 
@@ -116,8 +116,23 @@ public class CategoryService {
      */
     private Specification<CategoryEntity> containsName(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(CategoryEntity_.NAME), pattern);
+        });
+    }
+
+    /**
+     * Specification for hasStatus
+     * @param searchStatus
+     * @return specification
+     */
+    private Specification<CategoryEntity> hasStatus(int searchStatus) {
+        return ((root, query, criteriaBuilder) -> {
+            if(searchStatus < StatusSearchEnum.CategoryStatusSearchEnum.ALL.ordinal()) {
+                return criteriaBuilder.equal(root.get(CategoryEntity_.STATUS), searchStatus);
+            } else {
+                return criteriaBuilder.lessThan(root.get(CategoryEntity_.STATUS), StatusSearchEnum.CategoryStatusSearchEnum.ALL.ordinal());
+            }
         });
     }
 
@@ -127,14 +142,17 @@ public class CategoryService {
      * @param paginationRequestModel
      * @return resource of data
      */
-    public ResourceModel<CategoryModel> searchCategories(String searchedValue, PaginationRequestModel paginationRequestModel) {
+    public ResourceModel<CategoryModel> searchCategories(String searchedValue, PaginationRequestModel paginationRequestModel,
+                                                         CategoryFilterModel categoryFilterModel) {
         PaginationConvertor<CategoryModel, CategoryEntity> paginationConvertor = new PaginationConvertor<>();
 
         String defaultSortBy = CategoryEntity_.NAME;
         Pageable pageable = paginationConvertor.convertToPageable(paginationRequestModel, defaultSortBy, CategoryEntity.class);
 
         //Find all categories
-        Page<CategoryEntity> categoryEntityPage = categoryRepository.findAll(containsName(searchedValue), pageable);
+        Page<CategoryEntity> categoryEntityPage = categoryRepository.findAll(containsName(searchedValue)
+                .and(hasStatus(categoryFilterModel.getStatusType()))
+                .and(containsName(categoryFilterModel.getCategoryName())), pageable);
 
         //Convert list of categories entity to list of categories model
         List<CategoryModel> categoryModels = new ArrayList<>();
@@ -145,8 +163,27 @@ public class CategoryService {
         //Prepare resource for return
         ResourceModel<CategoryModel> resource = new ResourceModel<>();
         resource.setData(categoryModels);
+        resource.setSearchText(searchedValue);
+        resource.setSortBy(defaultSortBy);
+        resource.setSortType(paginationRequestModel.getSortType());
         paginationConvertor.buildPagination(paginationRequestModel, categoryEntityPage, resource);
         return resource;
+    }
+
+    /**
+     * Delete categories by ids
+     * @param ids
+     * @return deleted category models
+     */
+    public List<CategoryModel> deleteCategories(List<UUID> ids) {
+        if(ids == null) throw new NoSuchEntityException("Not found any category");
+        List<CategoryModel> deletedModels = new ArrayList<>();
+        for (UUID id : ids) {
+            CategoryModel categoryModel = deleteCategory(id);
+            deletedModels.add(categoryModel);
+        }
+
+        return deletedModels;
     }
 
 }

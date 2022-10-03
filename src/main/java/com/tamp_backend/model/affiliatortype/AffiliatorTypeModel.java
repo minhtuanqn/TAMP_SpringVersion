@@ -15,17 +15,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AffiliatorTypeModel {
-    public AffiliatorTypeModel(AffiliatorTypeEntity entity) {
-        this.id = entity.getId();
-        this.typeName = entity.getTypeName();
-        this.description = entity.getDescription();
-        this.commissionRate = entity.getCommissionRate();
-        this.status = entity.getStatus();
-    }
 
     private UUID id;
+
     private String typeName;
+
     private String description;
+
     private Double commissionRate;
+
     private Integer status;
 }

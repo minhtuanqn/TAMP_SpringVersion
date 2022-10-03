@@ -17,19 +17,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StationModel {
-    public StationModel(StationEntity entity) {
-        this.id = entity.getId();
-        this.name = entity.getName();
-        this.longitude = entity.getLongitude();
-        this.latitude = entity.getLatitude();
-        this.address = entity.getAddress();
-        this.detailAddress = entity.getDetailAddress();
-        this.createAt = entity.getCreateAt();
-        this.status = entity.getStatus();
-    }
 
     private UUID id;
+
     private String name;
+
     private Double longitude;
 
     private Double latitude;

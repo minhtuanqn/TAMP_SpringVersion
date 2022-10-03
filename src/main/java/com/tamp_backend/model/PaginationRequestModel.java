@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Model for pagination request from client
@@ -13,8 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaginationRequestModel {
-    private int pageIndex;
-    private int limit;
+    private int curPage;
+    private int pageSize;
     private String sortBy;
     private String sortType;
 }

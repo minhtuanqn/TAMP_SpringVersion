@@ -55,4 +55,33 @@ public class EntityStatusEnum {
         PENDING, //2
         REJECTED, //3
     }
+
+    /**
+     * Status of campaign entity
+     */
+    public enum CampaignStatusEnum
+    {
+        DELETED, // 0
+        ACTIVE, //1
+        PRODUCT_PREPARING, //2
+        READY, //3
+    }
+
+    /**
+     * Status of campaignCategory entity
+     */
+    public enum CampaignCategoryStatusEnum
+    {
+        DELETED, //0
+        ACTIVE, //1
+    }
+
+    /**
+     * Status of campaignProduct entity
+     */
+    public enum CampaignProductStatusEnum
+    {
+        DELETED, //0
+        ACTIVE, //1
+    }
 }

@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -18,13 +19,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AffiliatorTypeEntity {
-    public AffiliatorTypeEntity(AffiliatorTypeModel model) {
-        this.id = model.getId();
-        this.typeName = model.getTypeName();
-        this.description = model.getDescription();
-        this.commissionRate = model.getCommissionRate();
-        this.status = model.getStatus();
-    }
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -32,12 +26,19 @@ public class AffiliatorTypeEntity {
     @Column(name = "id", updatable = false, nullable = false)
     @Type(type = "uuid-char")
     private UUID id;
+
     @Column(name = "type_name")
     private String typeName;
+
     @Column(name = "description")
     private String description;
+
     @Column(name = "commission_rate")
     private Double commissionRate;
+
     @Column(name = "status")
     private Integer status;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "affiliatorTypeEntity")
+    private Set<AffiliatorEntity> affiliatorList;
 }

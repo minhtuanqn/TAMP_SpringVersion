@@ -3,11 +3,14 @@ package com.tamp_backend.controller;
 import com.tamp_backend.model.PaginationRequestModel;
 import com.tamp_backend.model.ResourceModel;
 import com.tamp_backend.model.ResponseModel;
+import com.tamp_backend.model.campaign.CampaignModel;
 import com.tamp_backend.model.supplier.CreateSupplierModel;
 import com.tamp_backend.model.supplier.SupplierFilterModel;
 import com.tamp_backend.model.supplier.SupplierModel;
 import com.tamp_backend.model.supplier.UpdateSupplierModel;
+import com.tamp_backend.model.suppliercampaign.SupplierCampaignFilterModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
+import com.tamp_backend.service.CampaignService;
 import com.tamp_backend.service.SupplierService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,9 +29,12 @@ import java.util.UUID;
 @RequestMapping(path = "/suppliers")
 public class SupplierController {
     private SupplierService supplierService;
+    private CampaignService campaignService;
 
-    public SupplierController(SupplierService supplierService) {
+    public SupplierController(SupplierService supplierService,
+                              CampaignService campaignService) {
         this.supplierService = supplierService;
+        this.campaignService = campaignService;
     }
 
     /**
@@ -110,21 +116,38 @@ public class SupplierController {
 
     /**
      * Search suppliers by name
-     * @param searchedValue
+     * @param searchText
      * @param paginationRequestModel
      * @return resource data of supplier
      */
     @GetMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<ResponseModel> searchSuppliers(@RequestParam(value = "searchedValue", defaultValue = "") String searchedValue,
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    public ResponseEntity<ResponseModel> searchSuppliers(@RequestParam(value = "searchText", defaultValue = "") String searchText,
                                                    @RequestPagingParam PaginationRequestModel paginationRequestModel,
                                                    @ModelAttribute SupplierFilterModel supplierFilterModel) {
-        ResourceModel<SupplierModel> supplierList = supplierService.searchSuppliers(searchedValue, paginationRequestModel, supplierFilterModel);
+        ResourceModel<SupplierModel> supplierList = supplierService.searchSuppliers(searchText, paginationRequestModel, supplierFilterModel);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(supplierList)
                 .message("OK");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }
 
-
+    /**
+     * Search suppliers by name
+     * @param searchText
+     * @param paginationRequestModel
+     * @return resource data of supplier
+     */
+    @GetMapping(path = "/{id}/campaigns", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'SUPPLIER')")
+    public ResponseEntity<ResponseModel> searchCampaignOfSupplier(@RequestParam(value = "searchText", defaultValue = "") String searchText,
+                                                         @RequestPagingParam PaginationRequestModel paginationRequestModel,
+                                                         @ModelAttribute SupplierCampaignFilterModel supplierCampaignFilterModel,
+                                                         @PathVariable UUID id) {
+        ResourceModel<CampaignModel> campaignList = campaignService.searchCampaignsOfSupplier(searchText, paginationRequestModel, supplierCampaignFilterModel, id);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(campaignList)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
 }

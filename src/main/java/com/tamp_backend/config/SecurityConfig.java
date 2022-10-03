@@ -56,9 +56,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().httpBasic()
+        http.csrf().disable()
                 //if any exception occurs call this
-                .and().exceptionHandling()
+                .exceptionHandling()
                 .authenticationEntryPoint(unauthorizedHandler)
                 // make sure we use stateless session; session won't be used to
                 // store user's state.

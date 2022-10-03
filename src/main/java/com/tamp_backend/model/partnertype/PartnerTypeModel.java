@@ -16,14 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PartnerTypeModel {
 
-    public PartnerTypeModel(PartnerTypeEntity entity) {
-        this.id = entity.getId();
-        this.typeName = entity.getTypeName();
-        this.description = entity.getDescription();
-        this.commissionRate = entity.getCommissionRate();
-        this.status = entity.getStatus();
-    }
-
     private UUID id;
 
     private String typeName;

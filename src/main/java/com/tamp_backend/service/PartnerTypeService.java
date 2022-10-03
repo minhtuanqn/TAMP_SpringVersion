@@ -2,15 +2,20 @@ package com.tamp_backend.service;
 
 
 import com.tamp_backend.constant.EntityStatusEnum;
+import com.tamp_backend.constant.StatusSearchEnum;
 import com.tamp_backend.convertor.PaginationConvertor;
 import com.tamp_backend.customexception.DuplicatedEntityException;
 import com.tamp_backend.customexception.NoSuchEntityException;
 import com.tamp_backend.entity.PartnerTypeEntity;
 import com.tamp_backend.metamodel.PartnerTypeEntity_;
 import com.tamp_backend.model.PaginationRequestModel;
+import com.tamp_backend.model.partnertype.CreatePartnerTypeModel;
+import com.tamp_backend.model.partnertype.PartnerTypeFilterModel;
 import com.tamp_backend.model.partnertype.PartnerTypeModel;
 import com.tamp_backend.model.ResourceModel;
+import com.tamp_backend.model.partnertype.UpdatePartnerTypeModel;
 import com.tamp_backend.repository.PartnerTypeRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,9 +29,12 @@ import java.util.UUID;
 @Service
 public class PartnerTypeService {
     private PartnerTypeRepository partnerTypeRepository;
+    private ModelMapper modelMapper;
 
-    public PartnerTypeService(PartnerTypeRepository partnerTypeRepository) {
+    public PartnerTypeService(PartnerTypeRepository partnerTypeRepository,
+                              ModelMapper modelMapper) {
         this.partnerTypeRepository = partnerTypeRepository;
+        this.modelMapper = modelMapper;
     }
 
     /**
@@ -35,11 +43,26 @@ public class PartnerTypeService {
      * @param searchedValue
      * @return specification
      */
-
     private Specification<PartnerTypeEntity> containsTypeName(String searchedValue) {
         return ((root, query, criteriaBuilder) -> {
-            String pattern = "%" + searchedValue + "%";
+            String pattern = searchedValue != null ? "%" + searchedValue + "%" : "%" + "%";
             return criteriaBuilder.like(root.get(PartnerTypeEntity_.TYPE_NAME), pattern);
+        });
+    }
+
+    /**
+     * Specification for hasStatus
+     * @param searchStatus
+     * @return specification
+     */
+    private Specification<PartnerTypeEntity> hasStatus(int searchStatus) {
+        return ((root, query, criteriaBuilder) -> {
+            if(searchStatus < StatusSearchEnum.PartnerTypeStatusSearchEnum.ALL.ordinal()) {
+                return criteriaBuilder.equal(root.get(PartnerTypeEntity_.STATUS), searchStatus);
+            } else {
+                return criteriaBuilder.lessThan(root.get(PartnerTypeEntity_.STATUS),
+                        StatusSearchEnum.PartnerTypeStatusSearchEnum.ALL.ordinal());
+            }
         });
     }
 
@@ -50,23 +73,30 @@ public class PartnerTypeService {
      * @param paginationRequestModel
      * @return resource of data
      */
-    public ResourceModel<PartnerTypeModel> searchPartnerTypes(String searchedValue, PaginationRequestModel paginationRequestModel) {
+    public ResourceModel<PartnerTypeModel> searchPartnerTypes(String searchedValue, PaginationRequestModel paginationRequestModel,
+                                                              PartnerTypeFilterModel partnerTypeFilterModel) {
         PaginationConvertor<PartnerTypeModel, PartnerTypeEntity> paginationConvertor = new PaginationConvertor<>();
         String defaultSortBy = PartnerTypeEntity_.TYPE_NAME;
         Pageable pageable = paginationConvertor.convertToPageable(paginationRequestModel, defaultSortBy, PartnerTypeEntity.class);
 
         //Find all partner types
-        Page<PartnerTypeEntity> partnerTypeEntityPage = partnerTypeRepository.findAll(containsTypeName(searchedValue), pageable);
+        Page<PartnerTypeEntity> partnerTypeEntityPage = partnerTypeRepository
+                .findAll(containsTypeName(searchedValue)
+                        .and(containsTypeName(partnerTypeFilterModel.getTypeName()))
+                        .and(hasStatus(partnerTypeFilterModel.getStatusType())), pageable);
 
         //Convert list of partner types entity to list of partner types model
         List<PartnerTypeModel> partnerTypeModels = new ArrayList<>();
         for (PartnerTypeEntity entity : partnerTypeEntityPage) {
-            partnerTypeModels.add(new PartnerTypeModel(entity));
+            partnerTypeModels.add(modelMapper.map(entity, PartnerTypeModel.class));
         }
 
         //Prepare resource for return
         ResourceModel<PartnerTypeModel> resource = new ResourceModel<>();
         resource.setData(partnerTypeModels);
+        resource.setSearchText(searchedValue);
+        resource.setSortBy(defaultSortBy);
+        resource.setSortType(paginationRequestModel.getSortType());
         paginationConvertor.buildPagination(paginationRequestModel, partnerTypeEntityPage, resource);
         return resource;
 
@@ -75,27 +105,22 @@ public class PartnerTypeService {
     /**
      * create a partner type
      *
-     * @param model
+     * @param createPartnerTypeModel
      * @return created model
      */
-    public PartnerTypeModel createPartnerType(PartnerTypeModel model) {
+    public PartnerTypeModel createPartnerType(CreatePartnerTypeModel createPartnerTypeModel) {
         // Check exist partner type
-        if (partnerTypeRepository.existsPartnerTypeEntitiesByTypeName(model.getTypeName())) {
-            throw new DuplicatedEntityException("This partner type already exist");
-        }
-
-        //Set id for model is null
-        if (model.getId() != null) {
-            model.setId(UUID.randomUUID());
+        if (partnerTypeRepository.existsPartnerTypeEntitiesByTypeName(createPartnerTypeModel.getTypeName())) {
+            throw new DuplicatedEntityException("Duplicated name of partner type");
         }
 
         //Prepare entity
-        PartnerTypeEntity entity = new PartnerTypeEntity(model);
+        PartnerTypeEntity entity = modelMapper.map(createPartnerTypeModel, PartnerTypeEntity.class);
         entity.setStatus(EntityStatusEnum.PartnerTypeStatusEnum.ACTIVE.ordinal());
 
         //Save entity to DB
         PartnerTypeEntity savedEntity = partnerTypeRepository.save(entity);
-        return model;
+        return modelMapper.map(savedEntity, PartnerTypeModel.class);
 
     }
 
@@ -104,37 +129,32 @@ public class PartnerTypeService {
      * @param id
      * @return found model
      */
-
     public PartnerTypeModel findPartnerTypeById(UUID id){
         //Find partner type by id
         Optional<PartnerTypeEntity> searchedPartnerTypeOptional = partnerTypeRepository.findById(id);
-        PartnerTypeEntity partnerTypeEntity = searchedPartnerTypeOptional.orElseThrow(() -> new NoSuchEntityException("Not found partner type"));
-        return new PartnerTypeModel(partnerTypeEntity);
+        PartnerTypeEntity partnerTypeEntity = searchedPartnerTypeOptional
+                .orElseThrow(() -> new NoSuchEntityException("Not found partnerType with id"));
+        return modelMapper.map(partnerTypeEntity, PartnerTypeModel.class);
     }
 
     /**
      * Update partner type
-     * @param id
-     * @param partnerTypeModel
+     * @param updatePartnerTypeModel
      * @return updated partner type
      */
-
-    public PartnerTypeModel updatePartnerType(UUID id, PartnerTypeModel partnerTypeModel){
+    public PartnerTypeModel updatePartnerType(UpdatePartnerTypeModel updatePartnerTypeModel){
         // Find partner type with id
-        Optional<PartnerTypeEntity> searchedPartnerTypeOptional = partnerTypeRepository.findById(id);
-        PartnerTypeEntity searchPartnerTypeEntity = searchedPartnerTypeOptional.orElseThrow(() -> new NoSuchEntityException("Not found partner type"));
+        Optional<PartnerTypeEntity> searchedPartnerTypeOptional = partnerTypeRepository.findById(updatePartnerTypeModel.getId());
+        PartnerTypeEntity searchPartnerTypeEntity = searchedPartnerTypeOptional.orElseThrow(() -> new NoSuchEntityException("Not found partnerType with id"));
 
         //Check existed partner type with name then update model
-        if(partnerTypeRepository.existsPartnerTypeEntitiesByTypeNameAndIdNot(partnerTypeModel.getTypeName(), id)){
-            throw new DuplicatedEntityException("This partner type existed");
+        if(partnerTypeRepository.existsPartnerTypeEntitiesByTypeNameAndIdNot(updatePartnerTypeModel.getTypeName(), updatePartnerTypeModel.getId())){
+            throw new DuplicatedEntityException("Duplicate name for partner type");
         }
 
-        //Prepare entity for saving to DB
-        partnerTypeModel.setId(id);
-
         //Save entity to DB
-        PartnerTypeEntity saveEntity = partnerTypeRepository.save(new PartnerTypeEntity(partnerTypeModel));
-        return new PartnerTypeModel(saveEntity);
+        PartnerTypeEntity saveEntity = partnerTypeRepository.save(modelMapper.map(updatePartnerTypeModel, PartnerTypeEntity.class));
+        return modelMapper.map(saveEntity, PartnerTypeModel.class);
     }
 
     /**
@@ -142,19 +162,33 @@ public class PartnerTypeService {
      * @param id
      * @return delete model
      */
-
     public PartnerTypeModel deletePartnerType(UUID id){
         // Find partner type with id
         Optional<PartnerTypeEntity> deletedPartnerTypeOptional = partnerTypeRepository.findById(id);
-        PartnerTypeEntity deletedPartnerTypeEntity = deletedPartnerTypeOptional.orElseThrow(() -> new NoSuchEntityException("Not found partner type"));
+        PartnerTypeEntity deletedPartnerTypeEntity = deletedPartnerTypeOptional
+                .orElseThrow(() -> new NoSuchEntityException("Not found partnerType with id"));
 
         //Set status for entity
         deletedPartnerTypeEntity.setStatus(EntityStatusEnum.PartnerTypeStatusEnum.DISABLE.ordinal());
 
         //Update status of partner type
         PartnerTypeEntity responseEntity = partnerTypeRepository.save(deletedPartnerTypeEntity);
-        return new PartnerTypeModel(responseEntity);
+        return modelMapper.map(responseEntity, PartnerTypeModel.class);
     }
 
+    /**
+     * Delete partnertype by ids
+     * @param ids
+     * @return deleted partnertype models
+     */
+    public List<PartnerTypeModel> deleteParnertypes(List<UUID> ids) {
+        if(ids == null) throw new NoSuchEntityException("Not found any partner type");
+        List<PartnerTypeModel> deletedModels = new ArrayList<>();
+        for (UUID id : ids) {
+            PartnerTypeModel partnerTypeModel = deletePartnerType(id);
+            deletedModels.add(partnerTypeModel);
+        }
+        return deletedModels;
+    }
 
 }

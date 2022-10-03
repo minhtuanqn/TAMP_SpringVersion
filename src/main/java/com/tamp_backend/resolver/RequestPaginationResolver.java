@@ -25,13 +25,18 @@ public class RequestPaginationResolver implements HandlerMethodArgumentResolver 
         String perPage = request.getParameter(PaginationConst.LIMIT);
         String sortType = request.getParameter(PaginationConst.SORT_TYPE);
         String sortBy = request.getParameter(PaginationConst.SORT_BY);
-        int pageIndex = PaginationConst.DEFAULT_PAGE_INDEX;
-        int limit = PaginationConst.DEFAULT_LIMIT;
+        int pageIndex;
+        int limit;
         if(page != null) {
             pageIndex = Integer.parseInt(page);
+            pageIndex = pageIndex > 0 ? --pageIndex : PaginationConst.DEFAULT_PAGE_INDEX;
+        } else {
+            pageIndex = PaginationConst.DEFAULT_PAGE_INDEX;
         }
         if(perPage != null) {
-            limit = Integer.parseInt(perPage);
+            limit = Integer.parseInt(perPage) > 0 ? Integer.parseInt(perPage) : PaginationConst.DEFAULT_LIMIT;
+        } else {
+            limit = PaginationConst.DEFAULT_LIMIT;
         }
 
         return new PaginationRequestModel(pageIndex, limit, sortBy, sortType);

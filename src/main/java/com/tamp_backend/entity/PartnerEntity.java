@@ -9,6 +9,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -61,4 +62,6 @@ public class PartnerEntity {
     @Column(name = "status")
     private int status;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "partnerEntity")
+    private Set<AffiliatorEntity> affiliatorList;
 }

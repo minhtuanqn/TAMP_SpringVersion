@@ -101,6 +101,8 @@ public class AppConfig implements WebMvcConfigurer {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.STANDARD);
+        modelMapper.getConfiguration().setAmbiguityIgnored(true);
+
         return modelMapper;
     }
 
@@ -110,6 +112,8 @@ public class AppConfig implements WebMvcConfigurer {
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**");
+        registry.addMapping("/**")
+                .allowedMethods("*")
+                .allowedOriginPatterns("http://localhost:3000");
     }
 }
