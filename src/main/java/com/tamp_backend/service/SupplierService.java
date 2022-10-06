@@ -59,7 +59,7 @@ public class SupplierService {
      * @param createSupplierModel
      * @return supplier
      */
-    public SupplierModel createSupplier(CreateSupplierModel createSupplierModel, String logoUrl) {
+    public SupplierModel createSupplier(CreateSupplierModel createSupplierModel, String logoUrl,UUID adminId) {
         //Check existed username or email in DB
         if (accountRepository.existsByUsername(createSupplierModel.getUsername()))
             throw new DuplicatedEntityException("This username existed");
@@ -80,7 +80,7 @@ public class SupplierService {
         createdSupplier.setCreateAt(LocalDateTime.now());
         createdSupplier.setUpdateAt(LocalDateTime.now());
         createdSupplier.setLogo(logoUrl);
-        createdSupplier.setCreateBy(UUID.fromString("e5facdba-b1b5-4077-8483-a9bfbb187955"));
+        createdSupplier.setCreateBy(adminId);
         SupplierEntity insertedSupplier = supplierRepository.save(createdSupplier);
 
         //Create new wallet for supplier

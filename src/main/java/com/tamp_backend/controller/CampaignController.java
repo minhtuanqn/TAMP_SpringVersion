@@ -7,6 +7,7 @@ import com.tamp_backend.model.ResponseModel;
 import com.tamp_backend.model.campaign.*;
 import com.tamp_backend.model.campaigncategory.*;
 import com.tamp_backend.model.campaignproduct.CampaignProductModel;
+import com.tamp_backend.model.campaignproduct.CampaignProductResponseModel;
 import com.tamp_backend.model.campaignproduct.CreateCampaignProductModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.*;
@@ -272,4 +273,80 @@ public class CampaignController {
                 .message("Added successfully");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }
+
+    /**
+     * Delete product from campaign
+     * @param id
+     * @param productId
+     * @return response entity contains model
+     */
+    @DeleteMapping(path = "/{id}/products/{productId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN','SUPPLIER')")
+    public ResponseEntity<ResponseModel> deleteProductFromCampaign(
+            @PathVariable UUID id, @PathVariable UUID productId) {
+        String username = UserUtils.getCurUsername();
+        String curRole = UserUtils.getCurRole();
+        UUID curUserId = null;
+        if (curRole.equals(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())) {
+            curUserId = systemAdminService.findSystemAdminByUsername(username).getId();
+        } else if (curRole.equals(UserEnum.RoleEnum.SUPPLIER.toString())) {
+            curUserId = supplierService.findSupplierByUsername(username).getId();
+        }
+        CampaignProductModel deletedModel = campaignProductService.deleteProductFromCampaign(id, productId,Enum.valueOf(UserEnum.RoleEnum.class, curRole),curUserId);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(deletedModel)
+                .message("Deleted successfully");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Delete product from campaign
+     * @param id
+     * @param productIds
+     * @return response entity contains model
+     */
+    @DeleteMapping(path = "/{id}/products", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN','SUPPLIER')")
+    public ResponseEntity<ResponseModel> deleteProductsFromCampaign(
+            @PathVariable UUID id, @RequestBody List<UUID> productIds) {
+        String username = UserUtils.getCurUsername();
+        String curRole = UserUtils.getCurRole();
+        UUID curUserId = null;
+        if (curRole.equals(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())) {
+            curUserId = systemAdminService.findSystemAdminByUsername(username).getId();
+        } else if (curRole.equals(UserEnum.RoleEnum.SUPPLIER.toString())) {
+            curUserId = supplierService.findSupplierByUsername(username).getId();
+        }
+        List<CampaignProductModel> deletedModel = campaignProductService.deleteProductsFromCampaign(id, productIds,Enum.valueOf(UserEnum.RoleEnum.class, curRole),curUserId);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(deletedModel)
+                .message("Deleted successfully");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
+    /**
+     * Get product from campaign
+     * @param id
+     * @param productId
+     * @return response entity contains model
+     */
+    @GetMapping(path = "/{id}/products/{productId}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'PARTNER','SUPPLIER', 'AFFILIATOR')")
+    public ResponseEntity<ResponseModel> getProductByIdOfCampaign(
+            @PathVariable UUID id, @PathVariable UUID productId) {
+        String username = UserUtils.getCurUsername();
+        String curRole = UserUtils.getCurRole();
+        UUID curUserId = null;
+        if (curRole.equals(UserEnum.RoleEnum.SYSTEM_ADMIN.toString())) {
+            curUserId = systemAdminService.findSystemAdminByUsername(username).getId();
+        } else if (curRole.equals(UserEnum.RoleEnum.SUPPLIER.toString())) {
+            curUserId = supplierService.findSupplierByUsername(username).getId();
+        }
+        CampaignProductResponseModel model = campaignProductService.findProductByIdOfCampaign(id, productId, Enum.valueOf(UserEnum.RoleEnum.class, curRole),curUserId);
+        ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
+                .data(model)
+                .message("OK");
+        return new ResponseEntity<>(responseModel, HttpStatus.OK);
+    }
+
 }

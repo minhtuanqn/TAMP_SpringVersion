@@ -56,7 +56,7 @@ public class PartnerService {
      * @param createPartnerModel
      * @return partner
      */
-    public PartnerModel createPartner(CreatePartnerModel createPartnerModel, String logoUrl) {
+    public PartnerModel createPartner(CreatePartnerModel createPartnerModel, String logoUrl,UUID adminId) {
         //Check existed username or email in DB
         if (accountRepository.existsByUsername(createPartnerModel.getUsername()))
             throw new DuplicatedEntityException("This username existed");
@@ -81,7 +81,7 @@ public class PartnerService {
         createdPartner.setCreateAt(LocalDateTime.now());
         createdPartner.setUpdateAt(LocalDateTime.now());
         createdPartner.setLogo(logoUrl);
-        createdPartner.setCreateBy(UUID.fromString("e5facdba-b1b5-4077-8483-a9bfbb187955"));
+        createdPartner.setCreateBy(adminId);
         PartnerEntity insertedPartner = partnerRepository.save(createdPartner);
 
         //Create new wallet for partner

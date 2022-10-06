@@ -9,6 +9,8 @@ import com.tamp_backend.model.partner.PartnerModel;
 import com.tamp_backend.model.partner.UpdatePartnerModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.PartnerService;
+import com.tamp_backend.service.SystemAdminService;
+import com.tamp_backend.utils.UserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +28,11 @@ import java.util.UUID;
 @RequestMapping(path = "/partners")
 public class PartnerController {
     private PartnerService partnerService;
+    private SystemAdminService systemAdminService;
 
-    public PartnerController(PartnerService partnerService) {
+    public PartnerController(PartnerService partnerService, SystemAdminService systemAdminService) {
         this.partnerService = partnerService;
+        this.systemAdminService = systemAdminService;
     }
 
     /**
@@ -41,7 +45,10 @@ public class PartnerController {
     @PostMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<ResponseModel> createPartner(@Valid @ModelAttribute CreatePartnerModel requestModel, @RequestPart MultipartFile logo) {
-        PartnerModel savedPartnerModel = partnerService.createPartner(requestModel, "");
+        String username = UserUtils.getCurUsername();
+        String curRole = UserUtils.getCurRole();
+        UUID curUserId = systemAdminService.findSystemAdminByUsername(username).getId();
+        PartnerModel savedPartnerModel = partnerService.createPartner(requestModel, "", curUserId);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value()).data(savedPartnerModel).message("Created successfully");
         return new ResponseEntity<>(responseModel, HttpStatus.OK);
     }

@@ -12,6 +12,8 @@ import com.tamp_backend.model.suppliercampaign.SupplierCampaignFilterModel;
 import com.tamp_backend.resolver.annotation.RequestPagingParam;
 import com.tamp_backend.service.CampaignService;
 import com.tamp_backend.service.SupplierService;
+import com.tamp_backend.service.SystemAdminService;
+import com.tamp_backend.utils.UserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,11 +32,12 @@ import java.util.UUID;
 public class SupplierController {
     private SupplierService supplierService;
     private CampaignService campaignService;
+    private SystemAdminService systemAdminService;
 
-    public SupplierController(SupplierService supplierService,
-                              CampaignService campaignService) {
+    public SupplierController(SupplierService supplierService, CampaignService campaignService, SystemAdminService systemAdminService) {
         this.supplierService = supplierService;
         this.campaignService = campaignService;
+        this.systemAdminService = systemAdminService;
     }
 
     /**
@@ -46,7 +49,10 @@ public class SupplierController {
     @PostMapping(path = "", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public ResponseEntity<ResponseModel> createSupplier(@Valid @ModelAttribute CreateSupplierModel requestModel, @RequestPart MultipartFile logo) {
-        SupplierModel savedSupplierModel = supplierService.createSupplier(requestModel, "");
+        String username = UserUtils.getCurUsername();
+        String curRole = UserUtils.getCurRole();
+        UUID curUserId = systemAdminService.findSystemAdminByUsername(username).getId();
+        SupplierModel savedSupplierModel = supplierService.createSupplier(requestModel, "",curUserId);
         ResponseModel responseModel = new ResponseModel().statusCode(HttpStatus.OK.value())
                 .data(savedSupplierModel)
                 .message("Created successfully");
